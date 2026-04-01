@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>SPE UDOM — Database Tables</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; color: #1a1a2e; padding: 32px 24px; }
+  h1 { text-align: center; color: #0052a3; margin-bottom: 8px; font-size: 1.8rem; }
+  .subtitle { text-align: center; color: #666; margin-bottom: 36px; font-size: 0.9rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 24px; }
+  .table-card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); overflow: hidden; }
+  .table-header { background: #0052a3; color: #fff; padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
+  .table-header .icon { font-size: 1.2rem; }
+  .table-header h2 { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.5px; }
+  .table-header .row-count { margin-left: auto; background: rgba(255,255,255,0.2); border-radius: 20px; padding: 2px 10px; font-size: 0.75rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  thead tr { background: #eef4ff; }
+  thead th { padding: 8px 12px; text-align: left; font-weight: 700; color: #0052a3; border-bottom: 2px solid #d0e0ff; }
+  tbody tr:nth-child(even) { background: #f8faff; }
+  tbody td { padding: 7px 12px; border-bottom: 1px solid #eee; vertical-align: top; }
+  .pk   { color: #e67e00; font-weight: 700; }
+  .fk   { color: #0066cc; }
+  .type { color: #555; font-family: monospace; font-size: 0.78rem; }
+  .badge { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; }
+  .badge-pk  { background: #fff3e0; color: #e67e00; }
+  .badge-fk  { background: #e3f0ff; color: #0052a3; }
+  .badge-uq  { background: #e8f5e9; color: #2e7d32; }
+  .badge-idx { background: #f3e5f5; color: #6a1b9a; }
+  .relations { margin-top: 32px; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 20px 24px; }
+  .relations h2 { color: #0052a3; margin-bottom: 16px; font-size: 1rem; }
+  .rel-list { display: flex; flex-wrap: wrap; gap: 10px; }
+  .rel-item { background: #eef4ff; border-radius: 8px; padding: 8px 14px; font-size: 0.82rem; }
+  .rel-item strong { color: #0052a3; }
+  .arrow { color: #999; margin: 0 6px; }
+</style>
+</head>
+<body>
+
+<h1>🗄️ SPE UDOM Chapter — Database Tables</h1>
+<p class="subtitle">Full schema reference · 15 tables · SQLite (Django ORM)</p>
+
+<div class="grid">
+
+  <!-- Student -->
+  <div class="table-card">
+    <div class="table-header">
+      <span class="icon">👤</span>
+      <h2>core_student</h2>
+      <span class="row-count">Custom User</span>
+    </div>
+    <table>
+      <thead><tr><th>Column</th><th>Type</th><th>Constraints</th></tr></thead>
+      <tbody>
+        <tr><td class="pk">id</td><td class="type">INTEGER</td><td><span class="badge badge-pk">PK · AUTO</span></td></tr>
+        <tr><td>email</td><td class="type">VARCHAR(254)</td><td><span class="badge badge-uq">UNIQUE</span></td></tr>
+        <tr><td>full_name</td><td class="type">VARCHAR(100)</td><td>NOT NULL</td></tr>
+        <tr><td>password</td><td class="type">VARCHAR(128)</td><td>NOT NULL</td></tr>
+        <tr><td>phone</td><td class="type">VARCHAR(15)</td><td>DEFAULT ''</td></tr>
+        <tr><td>year_of_study</td><td class="type">SMALLINT</td><td>NULLABLE</td></tr>
+        <tr><td>role</td><td class="type">VARCHAR(20)</td><td>admin | president | general_secretary | member</td></tr>
+        <tr><td>profile_picture</td><td class="type">VARCHAR(100)</td><td>NULLABLE</td></tr>
+        <tr><td>is_active</td><td class="type">BOOLEAN</td><td>DEFAULT 1</td></tr>
+        <tr><td>is_staff</td><td class="type">BOOLEAN</td><td>DEFAULT 0</td></tr>
+        <tr><td>is_superuser</td><td class="type">BOOLEAN</td><td>DEFAULT 0</td></tr>
+        <tr><td>last_login</td><td class="type">DATETIME</td><td>NULLABLE</td></tr>
+        <tr><td>date_joined</td><td class="type">DATETIME</td><td>AUTO</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Event -->
+  <div class="table-card">
+    <div class="table-header">
+      <span class="icon">📅</span>
+      <h2>core_event</h2>
+      <span class="row-count">Events</span>
+    </div>
+    <table>
+      <thead><tr><th>Column</th><th>Type</th><th>Constraints</th></tr></thead>
+      <tbody>
+        <tr><td class="pk">id</td><td class="type">INTEGER</td><td><span class="badge badge-pk">PK · AUTO</span></td></tr>
+        <tr><td>title</td><td class="type">VARCHAR(200)</td><td>NOT NULL</td></tr>
+        <tr><td>description</td><td class="type">TEXT</td><td>NOT NULL</td></tr>
+        <tr><td>location</td><td class="type">VARCHAR(200)</td><td>NOT NULL</td></tr>
+        <tr><td>date</td><td class="type">DATETIME</td><td>NOT NULL · <span class="badge badge-idx">IDX</span></td></tr>
+        <tr><td>status</td><td class="type">VARCHAR(10)</td><td>pending | approved | rejected | cancelled · <span class="badge badge-idx">IDX</span></td></tr>
+        <tr><td>cancel_reason</td><td class="type">TEXT</td><td>DEFAULT ''</td></tr>
+        <tr><td>created_at</td><td class="type">DATETIME</td><td>AUTO</td></tr>
+        <tr><td class="fk">created_by_id</td><td class="type">INTEGER</td><td><span class="badge badge-fk">FK → student</span> SET NULL</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- EventRegistration -->
+  <div class="table-card">
+    <div class="table-header">
+      <span class="icon">✅</span>
+      <h2>core_eventregistration</h2>
+      <span class="row-count">Registrations</span>
+    </div>
+    <table>
+      <thead><tr><th>Column</th><th>Type</th><th>Constraints</th></tr></thead>
+      <tbody>
+        <tr><td class="pk">id</td><td class="type">INTEGER</td><td><span class="badge badge-pk">PK · AUTO</span></td></tr>
+        <tr><td>registered_at</td><td class="type">DATETIME</td><td>AUTO</td></tr>
+        <tr><td class="fk">student_id</td><td class="type">INTEGER</td><td><span class="badge badge-fk">FK → student</span> CASCADE</td></tr>
+        <tr><td class="fk">event_id</td><td class="type">INTEGER</td><td><span class="badge badge-fk">FK → event</span> CASCADE</td></tr>
+        <tr><td colspan="3"><span class="badge badge-uq">UNIQUE (student_id, event_id)</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- EventPhoto -->
+  <div class="table-card">
+    <div class="table-header">
+      <span class="icon">🖼️</span>
+      <h2>core_eventphoto</h2>
+      <span class="row-count">Event Photos</span>
+    </div>
+    <table>
+      <thead><tr><th>Column</th><th>Type</th><th>Constraints</th></tr></thead>
+      <tbody>
+        <tr><td class="pk">id</td><td class="type">INTEGER</td><td><span class="badge badge-pk">PK · AUTO</span></td></tr>
+        <tr><td>photo</td><td class="type">VARCHAR(100)</td><td>NOT NULL</td></tr>
+        <tr><td>caption</td><td class="type">VARCHAR(200)</td><td>DEFAULT ''</td></tr>
+        <tr><td>uploaded_at</td><td class="type">DATETIME</td><td>AUTO · ORDER BY -uploaded_at</td></tr>
+        <tr><td class="fk">event_id</td><td class="type">INTEGER</td><td><span class="badge badge-fk">FK → event</span> CASCADE</td></tr>
+        <tr><td class="fk">uploaded_by_id</td><td class="type">INTEGER</td><td><span class="badge badge-fk">FK → student</span> SET NULL</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Announcement -->
+  <div class="table-card">
+    <div class="table-header">
+      <span class="icon">📢</span>
+      <h2>core_announcement</h2>
+      <span class="row-count">Announcements</span>
+    </div>
+    <table>
+      <thead><tr><th>Column</th><th>Type</th><th>Constraints</th></tr></thead>
+      <tbody>
+        <tr><td class="pk">id</td><td class="type">INTEGER</td><td><span class="badge badge-pk">PK · AUTO</span></td></tr>
+        <tr><td>title</td><td class="type">VARCHAR(200)</td><td>NOT NULL</td></tr>
+        <tr><td>message</td><td class="type">TEXT</td><td>NOT NULL</td></tr>
+        <tr><td>created_at</td><td class="type">DATETIME</td><td>AUTO</td></tr>
+        <tr><td class="fk">sent_by_id</td><td class="type">INTEGER</td><td><span class="badge badge-fk">FK → student</span> SET NULL</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Publication -->
+  <div class="table-card">
+    <div class="table-header">
+      <span class="icon">📄</span>
+      <h2>core_publication</h2>
+      <span class="row-count">Publications</span>
+    </div>
+    <table>
+      <thead><tr><th>Column</th><th>Type</th><th>Constraints</th></tr></thead>
+      <tbody>
+        <tr><td class="pk">id</td><td class="type">INTEGER</td><td><span class="badge badge-pk">PK · AUTO</span></td></tr>
+        <tr><td>title</td><td class="type">VARCHAR(200)</td><td>NOT NULL</td></tr>
+        <tr><td>content</td><td class="type">TEXT</td><td>DEFAULT ''</td></tr>
+        <tr><td>file</td><td class="type">VARCHAR(100)</td><td>NULLABLE</td></tr>
+        <tr><td>pub_type</td><td class="type">VARCHAR(20)</td><td>article | journal | document | image · <span class="badge badge-idx">IDX</span></td></tr>
+        <tr><td>created_at</td><td class="type">DATETIME</td><td>AUTO</td></tr>
+        <tr><td class="fk">published_by_id</td><td class="type">INTEGER</td><td><span class="badge badge-fk">FK → student</span> SET NULL</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Election -->
+  <div class="table-card">
+    <div class="table-header">
+      <span class="icon">🗳️</span>
+      <h2>core_election</h2>
+      <span class="row-count">Elections</span>
+    </div>
+    <table>
+      <thead><tr><th>Column</th><th>Type</th><th>Constraints</th></tr></thead>
+      <tbody>
+        <tr><td class="pk">id</td><td class="type">INTEGER</td><td><span class="badge badge-pk">PK · AUTO</span></td></tr>
+        <tr><td>title</td><td class="type">VARCHAR(200)</td><td>NOT NULL</td></tr>
+        <tr><td>description</td><td class="type">TEXT</td><td>DEFAULT ''</td></tr>
+        <tr><td>status</td><td class="type">VARCHAR(10)</td><td>draft | open | closed · <span class="badge badge-idx">IDX</span></td></tr>
+        <tr><td>start_date</td><td class="type">DATETIME</td><td>NOT NULL</td></tr>
+        <tr><td>end_date</td><td class="type">DATETIME</td><td>NOT NULL</td></tr>
+        <tr><td>created_at</td><td class="type">DATETIME</td><td>AUTO</td></tr>
+        <tr><td class="fk">created_by_id</td><td class="type">INTEGER</td><td><span class="badge badge-fk">FK → student</span> SET NULL</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Candidate -->
+  <div class="table-card">
+    <div class="table-header">
+      <span class="icon">🙋</span>
+      <h2>core_candidate</h2>
+      <span class="row-count">Candidates</span>
+    </div>
+    <table>
+      <thead><tr><th>Column</th><th>Type</th><th>Constraints</th></tr></thead>
+      <tbody>
+        <tr><td class="pk">id</td><td class="type">INTEGER</td><td><span class="badge badge-pk">PK · AUTO</span></td></tr>
+        <tr><td>name</td><td class="type">VARCHAR(100)</td><td>NOT NULL</td></tr>
+        <tr><td>position</td><td class="type">VARCHAR(100)</td><td>POSITION_CHOICES</td></tr>
+        <tr><td>manifesto</td><td class="type">TEXT</td><td>DEFAULT ''</td></tr>
+        <tr><td>photo</td><td class="type">VARCHAR(100)</td><td>NULLABLE</td></tr>
+        <tr><td>approved</td><td class="type">BOOLEAN</td><td>DEFAULT 0</td></tr>
+        <tr><td class="fk">election_id</td><td class="type">INTEGER</td><td><span class="badge badge-fk">FK → election</span> CASCADE · <span class="badge badge-idx">IDX</span></td></tr>
+        <tr><td colspan="3"><span class="badge badge-uq">UNIQUE (election_id, name, position)</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Vote -->
+  <div class="table-card">
+    <div class="table-header">
+      <span class="icon">🗹</span>
+      <h2>core_vote</h2>
+      <span class="row-count">Votes</span>
+    </div>
+    <table>
+      <thead><tr><th>Column</th><th>Type</th><th>Constraints</th></tr></thead>
+      <tbody>
+        <tr><td class="pk">id</td><td class="type">INTEGER</td><td><span class="badge badge-pk">PK · AUTO</span></td></tr>
+        <tr><td>position_voted</td><td class="type">VARCHAR(100)</td><td>NOT NULL</td></tr>
+        <tr><td>voted_at</td><td class="type">DATETIME</td><td>AUTO</td></tr>
+        <tr><td class="fk">election_id</td><td class="type">INTEGER</td><td><span class="badge badge-fk">FK → election</span> CASCADE · <span class="badge badge-idx">IDX</span></td></tr>
+        <tr><td class="fk">voter_id</td><td class="type">INTEGER</td><td><span class="badge badge-fk">FK → student</span> CASCADE · <span class="badge badge-idx">IDX</span></td></tr>
+        <tr><td class="fk">candidate_id</td><td class="type">INTEGER</td><td><span class="badge badge-fk">FK → candidate</span> CASCADE</td></tr>
+        <tr><td colspan="3"><span class="badge badge-uq">UNIQUE (election_id, voter_id, position_voted)</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Suggestion -->
+  <div class="table-card">
+    <div class="table-header">
+      <span class="icon">💬</span>
+      <h2>core_suggestion</h2>
+      <span class="row-count">Suggestions</span>
+    </div>
+    <table>
+      <thead><tr><th>Column</th><th>Type</th><th>Constraints</th></tr></thead>
+      <tbody>
+        <tr><td class="pk">id</td><td class="type">INTEGER</td><td><span class="badge badge-pk">PK · AUTO</span></td></tr>
+        <tr><td>message</td><td class="type">TEXT</td><td>NOT NULL</td></tr>
+        <tr><td>is_anonymous</td><td class="type">BOOLEAN</td><td>DEFAULT 0</td></tr>
+        <tr><td>reply</td><td class="type">TEXT</td><td>DEFAULT ''</td></tr>
+        <tr><td>replied_at</td><td class="type">DATETIME</td><td>NULLABLE</td></tr>
+        <tr><td>created_at</td><td class="type">DATETIME</td><td>AUTO</td></tr>
+        <tr><td class="fk">student_id</td><td class="type">INTEGER</td><td><span class="badge badge-fk">FK → student</span> CASCADE · <span class="badge badge-idx">IDX</span></td></tr>
+        <tr><td class="fk">replied_by_id</td><td class="type">INTEGER</td><td><span class="badge badge-fk">FK → student</span> SET NULL</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ContactMessage -->
+  <div class="table-card">
+    <div class="table-header">
+      <span class="icon">✉️</span>
+      <h2>core_contactmessage</h2>
+      <span class="row-count">Contact Messages</span>
+    </div>
+    <table>
+      <thead><tr><th>Column</th><th>Type</th><th>Constraints</th></tr></thead>
+      <tbody>
+        <tr><td class="pk">id</td><td class="type">INTEGER</td><td><span class="badge badge-pk">PK · AUTO</span></td></tr>
+        <tr><td>name</td><td class="type">VARCHAR(100)</td><td>NOT NULL</td></tr>
+        <tr><td>email</td><td class="type">VARCHAR(254)</td><td>NOT NULL</td></tr>
+        <tr><td>subject</td><td class="type">VARCHAR(200)</td><td>DEFAULT ''</td></tr>
+        <tr><td>message</td><td class="type">TEXT</td><td>NOT NULL</td></tr>
+        <tr><td>is_read</td><td class="type">BOOLEAN</td><td>DEFAULT 0</td></tr>
+        <tr><td>created_at</td><td class="type">DATETIME</td><td>AUTO</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- LeadershipMember -->
+  <div class="table-card">
+    <div class="table-header">
+      <span class="icon">🏅</span>
+      <h2>core_leadershipmember</h2>
+      <span class="row-count">Leadership</span>
+    </div>
+    <table>
+      <thead><tr><th>Column</th><th>Type</th><th>Constraints</th></tr></thead>
+      <tbody>
+        <tr><td class="pk">id</td><td class="type">INTEGER</td><td><span class="badge badge-pk">PK · AUTO</span></td></tr>
+        <tr><td>name</td><td class="type">VARCHAR(120)</td><td>NOT NULL</td></tr>
+        <tr><td>position</td><td class="type">VARCHAR(60)</td><td>POSITION_CHOICES</td></tr>
+        <tr><td>year</td><td class="type">VARCHAR(9)</td><td>e.g. 2025/2026 · <span class="badge badge-idx">IDX</span></td></tr>
+        <tr><td>image</td><td class="type">VARCHAR(100)</td><td>NULLABLE</td></tr>
+        <tr><td>display_order</td><td class="type">SMALLINT</td><td>DEFAULT 0</td></tr>
+        <tr><td>updated_at</td><td class="type">DATETIME</td><td>AUTO UPDATE</td></tr>
+        <tr><td colspan="3"><span class="badge badge-uq">UNIQUE (position, year)</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+
+  <!-- AnnualReport -->
+  <div class="table-card">
+    <div class="table-header">
+      <span class="icon">📋</span>
+      <h2>core_annualreport</h2>
+      <span class="row-count">Annual Reports</span>
+    </div>
+    <table>
+      <thead><tr><th>Column</th><th>Type</th><th>Constraints</th></tr></thead>
+      <tbody>
+        <tr><td class="pk">id</td><td class="type">INTEGER</td><td><span class="badge badge-pk">PK · AUTO</span></td></tr>
+        <tr><td>year</td><td class="type">VARCHAR(9)</td><td><span class="badge badge-uq">UNIQUE</span> e.g. 2025/2026</td></tr>
+        <tr><td>president_message</td><td class="type">TEXT</td><td>DEFAULT ''</td></tr>
+        <tr><td>president_image</td><td class="type">VARCHAR(100)</td><td>NULLABLE</td></tr>
+        <tr><td>membership_statistics</td><td class="type">TEXT</td><td>DEFAULT ''</td></tr>
+        <tr><td>membership_chart</td><td class="type">VARCHAR(100)</td><td>NULLABLE</td></tr>
+        <tr><td>technical_dissemination</td><td class="type">TEXT</td><td>DEFAULT ''</td></tr>
+        <tr><td>community_engagement</td><td class="type">TEXT</td><td>DEFAULT ''</td></tr>
+        <tr><td>member_recognition</td><td class="type">TEXT</td><td>DEFAULT ''</td></tr>
+        <tr><td>challenges</td><td class="type">TEXT</td><td>DEFAULT ''</td></tr>
+        <tr><td>recommendations</td><td class="type">TEXT</td><td>DEFAULT ''</td></tr>
+        <tr><td>created_at</td><td class="type">DATETIME</td><td>AUTO</td></tr>
+        <tr><td>updated_at</td><td class="type">DATETIME</td><td>AUTO UPDATE</td></tr>
+        <tr><td class="fk">created_by_id</td><td class="type">INTEGER</td><td><span class="badge badge-fk">FK → student</span> SET NULL</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- AnnualReportImage -->
+  <div class="table-card">
+    <div class="table-header">
+      <span class="icon">🖼️</span>
+      <h2>core_annualreportimage</h2>
+      <span class="row-count">Report Images</span>
+    </div>
+    <table>
+      <thead><tr><th>Column</th><th>Type</th><th>Constraints</th></tr></thead>
+      <tbody>
+        <tr><td class="pk">id</td><td class="type">INTEGER</td><td><span class="badge badge-pk">PK · AUTO</span></td></tr>
+        <tr><td>image</td><td class="type">VARCHAR(100)</td><td>NOT NULL</td></tr>
+        <tr><td>caption</td><td class="type">VARCHAR(200)</td><td>DEFAULT ''</td></tr>
+        <tr><td>uploaded_at</td><td class="type">DATETIME</td><td>AUTO</td></tr>
+        <tr><td colspan="3" style="color:#666;font-size:0.78rem;padding:6px 12px">Linked via M2M through annualreport_technical_images, annualreport_community_images, annualreport_recognition_images</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- AnnualReport M2M: technical_images -->
+  <div class="table-card">
+    <div class="table-header" style="background:#5c6bc0">
+      <span class="icon">🔀</span>
+      <h2>core_annualreport_technical_images</h2>
+      <span class="row-count">M2M</span>
+    </div>
+    <table>
+      <thead><tr><th>Column</th><th>Type</th><th>Constraints</th></tr></thead>
+      <tbody>
+        <tr><td class="pk">id</td><td class="type">INTEGER</td><td><span class="badge badge-pk">PK · AUTO</span></td></tr>
+        <tr><td class="fk">annualreport_id</td><td class="type">INTEGER</td><td><span class="badge badge-fk">FK → annualreport</span> CASCADE</td></tr>
+        <tr><td class="fk">annualreportimage_id</td><td class="type">INTEGER</td><td><span class="badge badge-fk">FK → annualreportimage</span> CASCADE</td></tr>
+        <tr><td colspan="3"><span class="badge badge-uq">UNIQUE (annualreport_id, annualreportimage_id)</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- AnnualReport M2M: community_images -->
+  <div class="table-card">
+    <div class="table-header" style="background:#5c6bc0">
+      <span class="icon">🔀</span>
+      <h2>core_annualreport_community_images</h2>
+      <span class="row-count">M2M</span>
+    </div>
+    <table>
+      <thead><tr><th>Column</th><th>Type</th><th>Constraints</th></tr></thead>
+      <tbody>
+        <tr><td class="pk">id</td><td class="type">INTEGER</td><td><span class="badge badge-pk">PK · AUTO</span></td></tr>
+        <tr><td class="fk">annualreport_id</td><td class="type">INTEGER</td><td><span class="badge badge-fk">FK → annualreport</span> CASCADE</td></tr>
+        <tr><td class="fk">annualreportimage_id</td><td class="type">INTEGER</td><td><span class="badge badge-fk">FK → annualreportimage</span> CASCADE</td></tr>
+        <tr><td colspan="3"><span class="badge badge-uq">UNIQUE (annualreport_id, annualreportimage_id)</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- AnnualReport M2M: recognition_images -->
+  <div class="table-card">
+    <div class="table-header" style="background:#5c6bc0">
+      <span class="icon">🔀</span>
+      <h2>core_annualreport_recognition_images</h2>
+      <span class="row-count">M2M</span>
+    </div>
+    <table>
+      <thead><tr><th>Column</th><th>Type</th><th>Constraints</th></tr></thead>
+      <tbody>
+        <tr><td class="pk">id</td><td class="type">INTEGER</td><td><span class="badge badge-pk">PK · AUTO</span></td></tr>
+        <tr><td class="fk">annualreport_id</td><td class="type">INTEGER</td><td><span class="badge badge-fk">FK → annualreport</span> CASCADE</td></tr>
+        <tr><td class="fk">annualreportimage_id</td><td class="type">INTEGER</td><td><span class="badge badge-fk">FK → annualreportimage</span> CASCADE</td></tr>
+        <tr><td colspan="3"><span class="badge badge-uq">UNIQUE (annualreport_id, annualreportimage_id)</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FinancialItem -->
+  <div class="table-card">
+    <div class="table-header">
+      <span class="icon">💰</span>
+      <h2>core_financialitem</h2>
+      <span class="row-count">Financial Items</span>
+    </div>
+    <table>
+      <thead><tr><th>Column</th><th>Type</th><th>Constraints</th></tr></thead>
+      <tbody>
+        <tr><td class="pk">id</td><td class="type">INTEGER</td><td><span class="badge badge-pk">PK · AUTO</span></td></tr>
+        <tr><td>item_source</td><td class="type">VARCHAR(200)</td><td>NOT NULL</td></tr>
+        <tr><td>expenditure</td><td class="type">DECIMAL(12,2)</td><td>DEFAULT 0</td></tr>
+        <tr><td>total_expenditure</td><td class="type">DECIMAL(12,2)</td><td>DEFAULT 0</td></tr>
+        <tr><td>outstanding_balance</td><td class="type">DECIMAL(12,2)</td><td>DEFAULT 0</td></tr>
+        <tr><td>balance</td><td class="type">DECIMAL(12,2)</td><td>DEFAULT 0</td></tr>
+        <tr><td class="fk">report_id</td><td class="type">INTEGER</td><td><span class="badge badge-fk">FK → annualreport</span> CASCADE</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- Relationships -->
+<div class="relations" style="margin-top: 32px;">
+  <h2>🔗 Foreign Key Relationships</h2>
+  <div class="rel-list">
+    <div class="rel-item"><strong>event</strong>.created_by_id <span class="arrow">→</span> <strong>student</strong>.id</div>
+    <div class="rel-item"><strong>eventregistration</strong>.student_id <span class="arrow">→</span> <strong>student</strong>.id</div>
+    <div class="rel-item"><strong>eventregistration</strong>.event_id <span class="arrow">→</span> <strong>event</strong>.id</div>
+    <div class="rel-item"><strong>eventphoto</strong>.event_id <span class="arrow">→</span> <strong>event</strong>.id</div>
+    <div class="rel-item"><strong>eventphoto</strong>.uploaded_by_id <span class="arrow">→</span> <strong>student</strong>.id</div>
+    <div class="rel-item"><strong>announcement</strong>.sent_by_id <span class="arrow">→</span> <strong>student</strong>.id</div>
+    <div class="rel-item"><strong>publication</strong>.published_by_id <span class="arrow">→</span> <strong>student</strong>.id</div>
+    <div class="rel-item"><strong>election</strong>.created_by_id <span class="arrow">→</span> <strong>student</strong>.id</div>
+    <div class="rel-item"><strong>candidate</strong>.election_id <span class="arrow">→</span> <strong>election</strong>.id</div>
+    <div class="rel-item"><strong>vote</strong>.election_id <span class="arrow">→</span> <strong>election</strong>.id</div>
+    <div class="rel-item"><strong>vote</strong>.voter_id <span class="arrow">→</span> <strong>student</strong>.id</div>
+    <div class="rel-item"><strong>vote</strong>.candidate_id <span class="arrow">→</span> <strong>candidate</strong>.id</div>
+    <div class="rel-item"><strong>suggestion</strong>.student_id <span class="arrow">→</span> <strong>student</strong>.id</div>
+    <div class="rel-item"><strong>suggestion</strong>.replied_by_id <span class="arrow">→</span> <strong>student</strong>.id</div>
+    <div class="rel-item"><strong>annualreport</strong>.created_by_id <span class="arrow">→</span> <strong>student</strong>.id</div>
+    <div class="rel-item"><strong>annualreport_technical_images</strong>.annualreport_id <span class="arrow">→</span> <strong>annualreport</strong>.id</div>
+    <div class="rel-item"><strong>annualreport_technical_images</strong>.annualreportimage_id <span class="arrow">→</span> <strong>annualreportimage</strong>.id</div>
+    <div class="rel-item"><strong>annualreport_community_images</strong>.annualreport_id <span class="arrow">→</span> <strong>annualreport</strong>.id</div>
+    <div class="rel-item"><strong>annualreport_community_images</strong>.annualreportimage_id <span class="arrow">→</span> <strong>annualreportimage</strong>.id</div>
+    <div class="rel-item"><strong>annualreport_recognition_images</strong>.annualreport_id <span class="arrow">→</span> <strong>annualreport</strong>.id</div>
+    <div class="rel-item"><strong>annualreport_recognition_images</strong>.annualreportimage_id <span class="arrow">→</span> <strong>annualreportimage</strong>.id</div>
+    <div class="rel-item"><strong>financialitem</strong>.report_id <span class="arrow">→</span> <strong>annualreport</strong>.id</div>
+  </div>
+</div>
+
+</body>
+</html>

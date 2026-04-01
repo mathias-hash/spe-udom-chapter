@@ -1,0 +1,49 @@
+.top-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 36px;
+  background: #0055b3;
+  border-bottom: 2px solid #003d7a;
+  z-index: 2000;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 6px rgba(0, 85, 179, 0.12);
+}
+
+.top-banner-track {
+  display: flex;
+  white-space: nowrap;
+  animation: banner-scroll 28s linear infinite;
+}
+
+.top-banner-text {
+  display: inline-block;
+  padding-right: 80px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+  color: #ffffff;
+}
+
+/* Highlight the e-SERVICES PORTAL part */
+.top-banner-text em {
+  color: #0099e6;
+  font-style: normal;
+}
+
+@keyframes banner-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.top-banner:hover .top-banner-track {
+  animation-play-state: paused;
+}
+
+@media (max-width: 600px) {
+  .top-banner { height: 30px; }
+  .top-banner-text { font-size: 0.68rem; letter-spacing: 1px; }
+}

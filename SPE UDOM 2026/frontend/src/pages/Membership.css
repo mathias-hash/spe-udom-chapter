@@ -1,0 +1,267 @@
+.membership-page { overflow-x: hidden; }
+
+/* Header */
+.mem-header {
+  background: linear-gradient(135deg, #003d7a, #0066cc);
+  padding: 60px 40px;
+  text-align: center;
+  color: #fff;
+}
+
+.mem-header h1 {
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  font-weight: 800;
+  margin-bottom: 14px;
+  line-height: 1.3;
+}
+
+.mem-header p {
+  font-size: 1rem;
+  opacity: 0.88;
+  max-width: 680px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* Tabs */
+.mem-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  background: #f0f4ff;
+  border-bottom: 2px solid #dde3f0;
+}
+
+.mem-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 40px;
+  border: none;
+  background: transparent;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #666;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+}
+
+.mem-tab-icon,
+.benefit-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #0a4ea3;
+}
+
+.mem-tab-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.benefit-icon {
+  width: 42px;
+  height: 42px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  background: #eef5ff;
+}
+
+.mem-svg-icon {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.mem-tab:hover { color: #0066cc; }
+.mem-tab.active { color: #0066cc; border-bottom-color: #0066cc; background: #fff; }
+
+/* Content */
+.mem-content {
+  background: #fff;
+  min-height: 400px;
+}
+
+.mem-section {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.mem-section h2 {
+  font-size: 1.6rem;
+  color: #1a1a2e;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.mem-intro {
+  color: #555;
+  font-size: 1rem;
+  line-height: 1.8;
+  margin-bottom: 32px;
+}
+
+/* Video */
+.mem-video-wrap {
+  background: #f0f4ff;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 32px;
+  border: 1px solid #dde8ff;
+}
+
+.mem-video-wrap h3 {
+  color: #1a1a2e;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.mem-video-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mem-video-icon {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #eef5ff;
+  color: #0a4ea3;
+  flex-shrink: 0;
+}
+
+.mem-video-wrap p {
+  color: #666;
+  font-size: 0.85rem;
+  margin-bottom: 14px;
+}
+
+.mem-video {
+  width: 100%;
+  border-radius: 10px;
+  max-height: 420px;
+  background: #000;
+  display: block;
+}
+
+/* Steps */
+.mem-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 36px;
+}
+
+.mem-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: #f8faff;
+  border-radius: 12px;
+  padding: 18px 20px;
+  border: 1px solid #e8f0fe;
+}
+
+.step-num {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #0066cc;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mem-step h4 { color: #1a1a2e; margin-bottom: 4px; font-size: 0.95rem; }
+.mem-step p { color: #666; font-size: 0.88rem; line-height: 1.6; margin: 0; }
+.mem-step a { color: #0066cc; font-weight: 600; }
+
+/* CTA */
+.mem-cta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.mem-btn-primary {
+  display: inline-block;
+  background: #0066cc;
+  color: #fff;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 0.92rem;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.mem-btn-primary:hover { background: #0052a3; transform: translateY(-2px); }
+
+.mem-btn-secondary {
+  display: inline-block;
+  background: transparent;
+  color: #0066cc;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 0.92rem;
+  border: 2px solid #0066cc;
+  transition: all 0.2s;
+}
+
+.mem-btn-secondary:hover { background: #0066cc; color: #fff; }
+
+/* Benefits */
+.mem-benefits { margin-bottom: 32px; }
+.mem-benefits h3 { font-size: 1.2rem; color: #1a1a2e; margin-bottom: 20px; font-weight: 700; }
+
+.mem-benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.mem-benefit-card {
+  background: #f8faff;
+  border-radius: 12px;
+  padding: 18px;
+  border: 1px solid #e8f0fe;
+  transition: transform 0.2s;
+}
+
+.mem-benefit-card:hover { transform: translateY(-3px); }
+.mem-benefit-card h4 { color: #1a1a2e; font-size: 0.9rem; margin-bottom: 6px; }
+.mem-benefit-card p { color: #666; font-size: 0.82rem; line-height: 1.6; margin: 0; }
+
+/* Renew box */
+.mem-renew-box {
+  background: linear-gradient(135deg, #f0f7ff, #e8f4ff);
+  border-radius: 14px;
+  padding: 28px;
+  border: 1px solid #c0d8f5;
+  text-align: center;
+}
+
+.mem-renew-box h3 { color: #1a1a2e; margin-bottom: 10px; font-size: 1.1rem; }
+.mem-renew-box p { color: #555; margin-bottom: 20px; font-size: 0.92rem; line-height: 1.7; }
+
+@media (max-width: 600px) {
+  .mem-header { padding: 40px 20px; }
+  .mem-tab { padding: 12px 24px; font-size: 0.88rem; }
+  .mem-cta { flex-direction: column; }
+  .mem-benefits-grid { grid-template-columns: 1fr; }
+}

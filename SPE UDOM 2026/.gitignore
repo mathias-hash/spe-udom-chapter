@@ -1,0 +1,7 @@
+
+# AI Code Review temporary files
+.ai-code-review/
+backend/.env
+backend/db.sqlite3
+backend/logs/
+backend/media/
