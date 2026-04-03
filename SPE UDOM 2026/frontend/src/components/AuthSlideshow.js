@@ -45,7 +45,7 @@ const AuthSlideshow = () => {
       {/* Branding overlay */}
       <div className="slide-brand">
         <div className="slide-brand-title">SPE UDOM STUDENTS CHAPTER</div>
-        <div className="slide-brand-sub">Empowering the next generation of petroleum engineers at the University of Dodoma</div>
+        <div className="slide-brand-sub">Empowering the next generation of engineers at the University of Dodoma</div>
       </div>
     </div>
   );

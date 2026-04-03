@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import DashboardLayout from './components/DashboardLayout';
 import AnnualReportPage from './components/AnnualReportPage';
-import ChatHistory from '../pages/ChatHistory';
 import Toast from '../components/Toast';
 import Spinner from '../components/Spinner';
 import ElectionAnalytics from '../components/ElectionAnalytics';
@@ -504,7 +503,11 @@ const AdminPublications = () => {
   const [loading, setLoading] = useState(true);
   useEffect(() => { apiList('/publications/').then(d => { setList(d); setLoading(false); }); }, []);
 
-  const resolveUrl = (url) => url.startsWith('http') ? url : `${window.location.origin.replace(':3000', ':8000')}${url}`;
+  const resolveUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${window.location.origin.replace(':3000', ':8000')}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
 
   const openFile = (url) => window.open(resolveUrl(url), '_blank', 'noopener,noreferrer');
 
@@ -535,10 +538,10 @@ const AdminPublications = () => {
                 <td>{p.published_by_name}</td>
                 <td>{new Date(p.created_at).toLocaleDateString()}</td>
                 <td>
-                  {p.file
+                  {p.file_url
                     ? <div style={{ display: 'flex', gap: 4 }}>
-                        <button className="btn btn-sm" style={{ background: '#0066cc', color: '#fff' }} onClick={() => openFile(p.file)}>Open</button>
-                        <button className="btn btn-sm" style={{ background: '#198754', color: '#fff' }} onClick={() => downloadFile(p.file, p.title)}>Download</button>
+                        <button className="btn btn-sm" style={{ background: '#0066cc', color: '#fff' }} onClick={() => openFile(p.file_url)}>Open</button>
+                        <button className="btn btn-sm" style={{ background: '#198754', color: '#fff' }} onClick={() => downloadFile(p.file_url, p.title)}>Download</button>
                       </div>
                     : <span style={{ color: '#aaa', fontSize: '0.8rem' }}>No file</span>}
                 </td>
@@ -684,7 +687,6 @@ const AdminDashboard = () => (
       <Route path="/analytics" element={<ElectionAnalytics />} />
       <Route path="/leadership" element={<Leadership />} />
       <Route path="/annual-report" element={<AnnualReportPage title="Annual Report" />} />
-      <Route path="/chat-history" element={<ChatHistory />} />
       <Route path="/profile" element={<Profile />} />
     </Routes>
   </DashboardLayout>

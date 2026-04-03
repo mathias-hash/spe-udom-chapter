@@ -101,8 +101,10 @@ const About = () => (
       <div className="about-inner">
         <span className="section-tag">Our Story</span>
         <h2>Chapter History</h2>
-        <p>The SPE UDOM Student Chapter was established at the University of Dodoma as part of the global Society of Petroleum Engineers network. Since its founding, the chapter has grown to become one of the most active student organizations in the Faculty of Earth Sciences, bringing together students passionate about petroleum engineering, geosciences, and energy technology.</p>
-        <p style={{ marginTop: 16 }}>Over the years, the chapter has organized numerous technical workshops, field trips, guest lectures from industry professionals, and participated in regional SPE competitions, earning recognition for academic excellence and community engagement.</p>
+        <p>The roots of the SPE UDOM Student Chapter trace back to 2013, when students from the Petroleum Engineering program at the University of Dodoma formed the Petroleum Engineering Students Association (PESA) to promote academic collaboration and professional growth.</p>
+        <p style={{ marginTop: 16 }}>Building on this foundation, the SPE UDOM Student Chapter was officially established on 30th June 2014 as part of the global Society of Petroleum Engineers (SPE) network. It became the first SPE student chapter in Tanzania, marking a significant milestone in advancing petroleum and energy-related education in the country.</p>
+        <p style={{ marginTop: 16 }}>Since its establishment, the chapter has grown into one of the most active student organizations within the Tanzania section. It brings together students from diverse fields including Petroleum Engineering, Geosciences, Chemical and Processing Engineering, Environmental Engineering, Renewable Energy, and Energy Technology.</p>
+        <p style={{ marginTop: 16 }}>Through its activities, the chapter continues to foster technical knowledge, leadership development, and professional networking, preparing members for successful careers in the energy industry.</p>
       </div>
     </section>
 

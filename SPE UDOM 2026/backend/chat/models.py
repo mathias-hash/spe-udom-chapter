@@ -86,7 +86,7 @@ class MessageQuota(models.Model):
         
         # Check if suspended
         if self.is_suspended:
-            return False, f'Account suspended: {self.suspension_reason}'
+            return False, f'Account suspended: {self.suspension_reason}', self.get_quota_info()
         
         # Reset daily count if period passed
         if self.daily_reset_at and self.daily_reset_at <= now:
@@ -105,13 +105,13 @@ class MessageQuota(models.Model):
         
         # Check limits
         if self.daily_count >= self.daily_limit:
-            return False, f'Daily quota exceeded ({self.daily_limit} messages/day)'
+            return False, f'Daily quota exceeded ({self.daily_limit} messages/day)', self.get_quota_info()
         if self.weekly_count >= self.weekly_limit:
-            return False, f'Weekly quota exceeded ({self.weekly_limit} messages/week)'
+            return False, f'Weekly quota exceeded ({self.weekly_limit} messages/week)', self.get_quota_info()
         if self.monthly_count >= self.monthly_limit:
-            return False, f'Monthly quota exceeded ({self.monthly_limit} messages/month)'
+            return False, f'Monthly quota exceeded ({self.monthly_limit} messages/month)', self.get_quota_info()
         
-        return True, 'OK'
+        return True, 'OK', self.get_quota_info()
     
     def increment_quota(self):
         """Increment message counts"""

@@ -20,9 +20,9 @@ a { text-decoration: none; }
 
 .main-content {
   margin-left: 180px;
-  margin-top: 36px;
+  margin-top: 62px;
   transition: margin-left 0.3s ease;
-  min-height: calc(100vh - 36px);
+  min-height: calc(100vh - 62px);
   padding: 0;
   width: calc(100vw - 180px);
   overflow-x: hidden;
@@ -83,7 +83,7 @@ a { text-decoration: none; }
 .leadership-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 80px;
+  gap: 16px;
   padding: 0 24px 32px;
   max-width: 900px;
   margin: 0 auto;
@@ -250,7 +250,7 @@ a { text-decoration: none; }
 }
 
 @media screen and (max-width: 768px) {
-  .main-content { margin-left: 150px; width: calc(100vw - 150px); }
+  .main-content { margin-left: 0; width: 100%; padding-top: 86px; }
   .main-content > *:not(.site-footer) { max-width: 100%; }
   .page-container { max-width: 100%; padding: 14px 10px; }
   .leadership-page, .contact-page { max-width: 100%; }
@@ -258,7 +258,7 @@ a { text-decoration: none; }
 }
 
 @media screen and (max-width: 480px) {
-  .main-content { margin-left: 150px; width: calc(100vw - 150px); }
-  .leadership-grid { grid-template-columns: repeat(2, 1fr); }
+  .main-content { margin-left: 0; width: 100%; }
+  .leadership-grid { grid-template-columns: 1fr; }
   .contact-form input, .contact-form textarea { padding: 10px 12px; }
 }

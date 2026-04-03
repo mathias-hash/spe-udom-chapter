@@ -57,7 +57,15 @@ def env_list(name, default):
 
 
 ALLOWED_HOSTS = env_list('ALLOWED_HOSTS', 'localhost,127.0.0.1')
-TRUSTED_ORIGINS = env_list('TRUSTED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000')
+TRUSTED_ORIGINS = env_list(
+    'TRUSTED_ORIGINS',
+    'http://localhost:3000,'
+    'http://127.0.0.1:3000,'
+    'http://0.0.0.0:3000,'
+    'http://localhost:3001,'
+    'http://127.0.0.1:3001,'
+    'http://0.0.0.0:3001'
+)
 
 # ─── API SECURITY SETTINGS ─────────────────────────────────────
 API_SECRET_KEY = env('API_SECRET_KEY', default=SECRET_KEY)
@@ -65,6 +73,7 @@ IP_WHITELIST = env_list('IP_WHITELIST', '')  # Leave empty to allow all IPs
 ALLOW_ADMIN_IP_ONLY = env.bool('ALLOW_ADMIN_IP_ONLY', default=False)
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

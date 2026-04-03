@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import Spinner from '../components/Spinner';
-import { API_BASE } from '../utils/api';
 import './Publication.css';
 
 const ITEMS_PER_PAGE = 6;
@@ -61,10 +60,11 @@ const Publication = () => {
                           <span>By {p.published_by_name}</span>
                           <span>{new Date(p.created_at).toLocaleDateString()}</span>
                         </div>
-                        {p.file && (
+                        {p.file_url && (
                           <a
-                            href={`${p.file.startsWith('http') ? p.file : API_BASE + p.file}`}
-                            download
+                            href={p.file_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="pub-download"
                           >
                             ⬇ Download

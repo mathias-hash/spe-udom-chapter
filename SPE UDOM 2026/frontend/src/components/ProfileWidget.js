@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './ProfileWidget.css';
 
@@ -42,15 +42,14 @@ const RegisterIcon = () => (
   </svg>
 );
 
+const AUTH_PATHS = ['/login', '/register', '/forgot-password'];
+
 const ProfileWidget = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
-
-  const initials = user?.full_name
-    ? user.full_name.split(' ').filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('')
-    : '?';
 
   useEffect(() => {
     const handleClick = (e) => {
@@ -58,16 +57,25 @@ const ProfileWidget = () => {
         setOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
+
+  if (AUTH_PATHS.some(p => location.pathname.startsWith(p)) || location.pathname.startsWith('/reset-password')) {
+    return null;
+  }
+
+  const initials = user?.full_name
+    ? user.full_name.split(' ').filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('')
+    : '?';
 
   const handleLogout = () => {
     logout();
     setOpen(false);
     navigate('/login');
   };
+
+  const profileTarget = '/dashboard/profile';
 
   return (
     <div className="pw-wrap" ref={ref}>
@@ -101,7 +109,7 @@ const ProfileWidget = () => {
                   <DashboardIcon />
                   <span>Dashboard</span>
                 </Link>
-                <Link to="/dashboard/profile" className="pw-item" onClick={() => setOpen(false)}>
+                <Link to={profileTarget} className="pw-item" onClick={() => setOpen(false)}>
                   <ProfileIcon />
                   <span>Profile</span>
                 </Link>

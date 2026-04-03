@@ -3,7 +3,24 @@ import { useAuth } from '../context/AuthContext';
 import './ChatWidget.css';
 
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
-const wsBaseUrl = process.env.REACT_APP_WS_BASE_URL || apiBaseUrl.replace(/^http/, 'ws');
+
+// Construct WebSocket URL correctly
+const getWsBaseUrl = () => {
+  if (process.env.REACT_APP_WS_BASE_URL) {
+    return process.env.REACT_APP_WS_BASE_URL;
+  }
+  // Parse the API base URL properly
+  try {
+    const url = new URL(apiBaseUrl);
+    const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${protocol}//${url.host}`;
+  } catch (e) {
+    console.error('Invalid API base URL:', apiBaseUrl);
+    return 'ws://localhost:8000';
+  }
+};
+
+const wsBaseUrl = getWsBaseUrl();
 
 const ChatWidget = () => {
   const { user } = useAuth();
@@ -70,9 +87,18 @@ const ChatWidget = () => {
     const socket = new WebSocket(`${wsBaseUrl}/ws/chat/${room.room_key}/`);
     socketRef.current = socket;
 
-    socket.onopen = () => setIsConnected(true);
-    socket.onclose = () => setIsConnected(false);
-    socket.onerror = () => setIsConnected(false);
+    socket.onopen = () => {
+      console.log('WebSocket connected:', wsBaseUrl);
+      setIsConnected(true);
+    };
+    socket.onclose = (event) => {
+      console.log('WebSocket closed:', event.code, event.reason);
+      setIsConnected(false);
+    };
+    socket.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      setIsConnected(false);
+    };
     socket.onmessage = (event) => {
       const payload = JSON.parse(event.data);
       if (payload.type !== 'message') {

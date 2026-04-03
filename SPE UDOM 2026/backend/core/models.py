@@ -200,16 +200,16 @@ def is_valid_academic_year_format(year):
 
 
 def available_academic_years():
-    years = {f'{y}/{y + 1}' for y in range(ACADEMIC_YEAR_START, DEFAULT_VISIBLE_ACADEMIC_YEAR_END + 1)}
+    # Base range: 2024/2025 to 2026/2027 only
+    base = {f'{y}/{y + 1}' for y in range(ACADEMIC_YEAR_START, DEFAULT_VISIBLE_ACADEMIC_YEAR_END + 1)}
 
-    leadership_years = LeadershipMember.objects.values_list('year', flat=True).distinct()
-    report_years = AnnualReport.objects.values_list('year', flat=True).distinct()
+    # Only add years that have actual LeadershipMember records beyond the base range
+    advanced = set()
+    for year in LeadershipMember.objects.values_list('year', flat=True).distinct():
+        if is_valid_academic_year_format(year) and year not in base:
+            advanced.add(year)
 
-    for year in list(leadership_years) + list(report_years):
-        if is_valid_academic_year_format(year):
-            years.add(year)
-
-    return sorted(years)
+    return sorted(base | advanced)
 
 
 def latest_available_academic_year():

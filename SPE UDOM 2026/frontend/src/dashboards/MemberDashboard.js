@@ -6,7 +6,6 @@ import Toast from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../utils/api';
 import Leadership from '../pages/Leadership';
-import ChatHistory from '../pages/ChatHistory';
 
 const extractList = (data) => Array.isArray(data) ? data : (data?.results || []);
 
@@ -108,7 +107,11 @@ const Publications = () => {
   const [list, setList] = useState([]);
   useEffect(() => { api('/publications/').then(r => setList(extractList(r.data))); }, []);
 
-  const resolveUrl = (url) => url.startsWith('http') ? url : `${window.location.origin.replace(':3000', ':8000')}${url}`;
+  const resolveUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${window.location.origin.replace(':3000', ':8000')}${url}`;
+  };
   const openFile = (url) => window.open(resolveUrl(url), '_blank', 'noopener,noreferrer');
   const downloadFile = async (url, title) => {
     try {
@@ -136,10 +139,10 @@ const Publications = () => {
               <td style={{ fontSize: '0.82rem', color: '#555' }}>{p.content?.substring(0, 60)}...</td>
               <td>{new Date(p.created_at).toLocaleDateString()}</td>
               <td>
-                {p.file
+                {p.file_url
                   ? <div style={{ display: 'flex', gap: 4 }}>
-                      <button className="btn btn-sm" style={{ background: '#0066cc', color: '#fff' }} onClick={() => openFile(p.file)}>Open</button>
-                      <button className="btn btn-sm" style={{ background: '#198754', color: '#fff' }} onClick={() => downloadFile(p.file, p.title)}>Download</button>
+                      <button className="btn btn-sm" style={{ background: '#0066cc', color: '#fff' }} onClick={() => openFile(p.file_url)}>Open</button>
+                      <button className="btn btn-sm" style={{ background: '#198754', color: '#fff' }} onClick={() => downloadFile(p.file_url, p.title)}>Download</button>
                     </div>
                   : <span style={{ color: '#aaa', fontSize: '0.8rem' }}>—</span>}
               </td>
@@ -402,8 +405,7 @@ const Suggestions = () => {
       api('/suggestions/my/').then(r => setMySuggestions(Array.isArray(r.data) ? r.data : []));
     } else setToast({ message: 'Failed to submit suggestion.', type: 'error' });
   };
-
-return (
+  return (
     <>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
@@ -476,7 +478,6 @@ const MemberDashboard = () => (
       <Route path="/elections" element={<ElectionsVote />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/suggestions" element={<Suggestions />} />
-      <Route path="/chat-history" element={<ChatHistory />} />
     </Routes>
   </DashboardLayout>
 );

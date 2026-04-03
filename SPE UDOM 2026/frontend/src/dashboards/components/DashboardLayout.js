@@ -47,7 +47,6 @@ const menuByRole = {
   member: [
     { path: '/dashboard', label: 'Overview' },
     { path: '/dashboard/events', label: 'Events' },
-    { path: '/dashboard/my-events', label: 'My Registrations' },
     { path: '/dashboard/publications', label: 'Publications' },
     { path: '/dashboard/annual-report', label: 'Annual Report' },
     { path: '/dashboard/leadership', label: 'Leadership' },
@@ -62,7 +61,7 @@ const DashboardLayout = ({ children }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768);
 
   const menu = menuByRole[user?.role] || menuByRole.member;
 
@@ -74,6 +73,9 @@ const DashboardLayout = ({ children }) => {
   return (
     <div className="dash-wrapper">
       <TopBanner />
+      {sidebarOpen && window.innerWidth < 768 && (
+        <div className="dash-sidebar-overlay" onClick={() => setSidebarOpen(false)} />
+      )}
       <aside className={`dash-sidebar ${sidebarOpen ? '' : 'closed'}`}>
         <div className="dash-logo">
           <img src={logo} alt="SPE UDOM" className="dash-logo-image" />

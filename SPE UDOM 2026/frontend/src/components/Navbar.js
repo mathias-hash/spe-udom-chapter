@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import logo from '../assets/spe-udom-logo.png';
 import TopBanner from './TopBanner';
@@ -17,11 +17,18 @@ const navItems = [
 
 const Navbar = () => {
   const location = useLocation();
+  const [open, setOpen] = useState(false);
+
+  const close = () => setOpen(false);
 
   return (
     <>
       <TopBanner />
-      <div className="sidebar">
+      <button className="sidebar-hamburger" onClick={() => setOpen(o => !o)} aria-label="Toggle menu">
+        <span /><span /><span />
+      </button>
+      {open && <div className="sidebar-overlay" onClick={close} />}
+      <div className={`sidebar${open ? ' sidebar-open' : ''}`}>
         <div className="sidebar-logo">
           <img src={logo} alt="SPE UDOM" className="sidebar-logo-image" />
           <div className="sidebar-logo-divider" />
@@ -36,6 +43,7 @@ const Navbar = () => {
               <Link
                 to={path}
                 className={`sidebar-link ${location.pathname === path ? 'active' : ''}`}
+                onClick={close}
               >
                 {label}
               </Link>

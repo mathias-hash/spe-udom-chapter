@@ -3,16 +3,12 @@ import { Link } from 'react-router-dom';
 import { API_BASE } from '../utils/api';
 import home1 from '../assets/home1.png.jpeg';
 import home2 from '../assets/home2.png.jpeg';
-import home3 from '../assets/home3.png.jpeg';
-import home31 from '../assets/home3.1.png';
 import home4 from '../assets/home4.png.jpeg';
 import './Home.css';
 
 const slides = [
   { img: home1, caption: 'SPE UDOM Networking', position: 'center center', scale: 1, fit: 'cover' },
   { img: home2, caption: 'Technical Workshop & Seminar', position: 'center center', scale: 1, fit: 'cover' },
-  { img: home3, caption: 'SPE UDOM Chapter Members', position: 'center center', scale: 1, fit: 'cover' },
-  { img: home31, caption: 'SPE UDOM Chapter Members', position: 'center center', scale: 1, fit: 'cover' },
   { img: home4, caption: 'SPE UDOM Networking', position: 'center center', scale: 1, fit: 'cover' },
 ];
 
@@ -67,7 +63,7 @@ const HeroSlideshow = () => {
       <div className="hero-slide-content">
         <div className="hero-badge">Society of Petroleum Engineers</div>
         <h1>SPE UDOM Students Chapter</h1>
-        <p>Empowering the next generation of petroleum engineers at the University of Dodoma. Join us in shaping the future of energy.</p>
+        <p>Empowering the next generation of engineers at the University of Dodoma. Join us in shaping the future of energy.</p>
         <div className="hero-actions">
           <Link to="/join" className="btn-hero-primary">Join Our Chapter</Link>
           <Link to="/events" className="btn-hero-secondary">View Events</Link>

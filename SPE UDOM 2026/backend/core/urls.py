@@ -9,6 +9,7 @@ urlpatterns = [
     path('leadership/', views.leadership),
     path('leadership/years/', views.leadership_years),
     path('leadership/advance-year/', views.leadership_advance_year),
+    path('leadership/delete-year/<str:year>/', views.leadership_delete_year),
     path('leadership/manage/', views.leadership_create),
     path('leadership/<int:pk>/', views.leadership_detail),
     path('contact/', views.contact),

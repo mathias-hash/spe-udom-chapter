@@ -756,6 +756,16 @@ def leadership_years(request):
     return JsonResponse({'years': available_academic_years()})
 
 
+@api_view(['DELETE'])
+@permission_classes([IsGeneralSecretary])
+def leadership_delete_year(request, year):
+    """Delete all leadership members for a given academic year."""
+    deleted, _ = LeadershipMember.objects.filter(year=year).delete()
+    if deleted == 0:
+        return Response({'error': 'No leadership records found for this year.'}, status=404)
+    return Response(status=204)
+
+
 @api_view(['POST'])
 @permission_classes([IsGeneralSecretary])
 def leadership_advance_year(request):
@@ -855,7 +865,7 @@ def annual_report_list(request):
     return Response(list(reports))
 
 
-@api_view(['GET', 'POST'])
+@api_view(['GET', 'POST', 'DELETE'])
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser, FormParser, JSONParser])
 def annual_report_detail(request, year):
@@ -863,6 +873,16 @@ def annual_report_detail(request, year):
         return Response({'error': 'Year must be in format YYYY/YYYY and consecutive, e.g. 2025/2026.'}, status=400)
     if not is_allowed_academic_year(year):
         return Response({'error': 'Year must be between 2024/2025 and 2026/2027 unless a newer year has been advanced.'}, status=400)
+
+    if request.method == 'DELETE':
+        if request.user.role != 'general_secretary':
+            return Response({'error': 'Only the General Secretary can delete annual reports.'}, status=403)
+        try:
+            r = AnnualReport.objects.get(year=year)
+            r.delete()
+            return Response(status=204)
+        except AnnualReport.DoesNotExist:
+            return Response({'error': 'Report not found.'}, status=404)
     if request.method == 'GET':
         try:
             r = AnnualReport.objects.get(year=year)

@@ -16,7 +16,10 @@ const defaultLeaders = [
   { name: 'To Be Announced', position: 'FACULTY ADVISOR', image_url: '' },
 ];
 
+const placeholderCache = new Map();
+
 const createPlaceholder = (position) => {
+  if (placeholderCache.has(position)) return placeholderCache.get(position);
   const initials = position.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('');
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320">
     <defs><linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -27,7 +30,9 @@ const createPlaceholder = (position) => {
     <path d="M82 258c14-44 53-70 78-70s64 26 78 70" fill="rgba(255,255,255,0.22)"/>
     <text x="160" y="294" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="36" font-weight="700" fill="#ffffff">${initials}</text>
   </svg>`;
-  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+  const url = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+  placeholderCache.set(position, url);
+  return url;
 };
 
 const Leadership = () => {
@@ -36,21 +41,37 @@ const Leadership = () => {
   const [activeYear, setActiveYear] = useState('');
   const [years, setYears] = useState([]);
 
-  // Load available years once, then set activeYear to the last (most recent)
+  // Fetch years and latest members in parallel
   useEffect(() => {
+    let ignore = false;
+    setLoading(true);
     fetch(`${API_BASE}/leadership/years/`)
       .then(r => r.json())
       .then(d => {
         const ys = d.years || [];
+        if (ignore) return;
         setYears(ys);
-        if (ys.length > 0) setActiveYear(ys[ys.length - 1]);
+        const latest = ys.length > 0 ? ys[ys.length - 1] : null;
+        if (!latest) { setLoading(false); return; }
+        setActiveYear(latest);
+        return fetch(`${API_BASE}/leadership/?year=${encodeURIComponent(latest)}`)
+          .then(r => r.json())
+          .then(data => {
+            if (ignore) return;
+            const map = new Map((data.members || []).map(m => [m.position, m]));
+            setMembers(defaultLeaders.map(d => ({ ...d, ...(map.get(d.position) || {}) })));
+          });
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => { if (!ignore) setLoading(false); });
+    return () => { ignore = true; };
   }, []);
 
-  // Load members whenever activeYear changes
+  // Fetch members when user manually changes year
   useEffect(() => {
     if (!activeYear) return;
+    // Guard: only fetch if activeYear is a known valid year
+    if (years.length && !years.includes(activeYear)) return;
     let ignore = false;
     setLoading(true);
     fetch(`${API_BASE}/leadership/?year=${encodeURIComponent(activeYear)}`)
@@ -80,7 +101,10 @@ const Leadership = () => {
 
         {/* Year dropdown */}
         {years.length > 0 && (
-          <div style={{ marginTop: 20, display: 'flex', justifyContent: 'center' }}>
+          <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+            <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'rgba(255,255,255,0.75)' }}>
+              Select the year to view the leadership team.
+            </label>
             <select
               value={activeYear}
               onChange={e => setActiveYear(e.target.value)}
@@ -111,7 +135,7 @@ const Leadership = () => {
         : <div className="leadership-grid">
             {cards.map(leader => (
               <article key={leader.position} className="leader-card">
-                <img className="leader-image" src={leader.imageSrc} alt={leader.position} />
+                <img className="leader-image" src={leader.imageSrc} alt={leader.position} loading="lazy" />
                 <div className="leader-content">
                   <h2>{leader.name}</h2>
                   <span className="leader-role">{leader.position}</span>
