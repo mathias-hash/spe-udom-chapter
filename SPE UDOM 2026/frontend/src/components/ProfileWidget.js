@@ -65,6 +65,8 @@ const ProfileWidget = () => {
     return null;
   }
 
+  if (!user) return null;
+
   const initials = user?.full_name
     ? user.full_name.split(' ').filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('')
     : '?';
