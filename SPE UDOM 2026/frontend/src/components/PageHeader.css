@@ -9,7 +9,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 0 20px 0 16px;
+  padding: 0 20px 0 0;
   z-index: 900;
   box-shadow: 0 2px 8px rgba(0,60,140,0.07);
 }
@@ -20,6 +20,7 @@
   object-fit: contain;
   flex-shrink: 0;
   margin-left: 0;
+  padding: 0;
 }
 
 .page-header-text {
@@ -58,13 +59,13 @@
 
 @media (min-width: 1024px) {
   .page-header {
-    padding-left: 248px;
+    padding-left: 0;
   }
 }
 
 @media (max-width: 600px) {
   .page-header {
-    padding-left: 6px;
+    padding-left: 0;
     gap: 10px;
   }
 
