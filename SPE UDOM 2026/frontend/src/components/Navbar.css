@@ -1,61 +1,22 @@
+/* Mobile-first sidebar: hidden off-screen by default */
 .sidebar {
   position: fixed;
-  top: 62px;
-  left: 0;
-  height: calc(100vh - 62px);
-  width: 180px;
-  background: #0055b3;
-  z-index: 1000;
+  top: 96px;
+  left: -260px;
+  height: calc(100% - 96px);
+  width: 240px;
+  background: #0f2342;
+  z-index: 1100;
   display: flex;
   flex-direction: column;
   box-shadow: 2px 0 6px rgba(0,0,0,0.15);
   overflow-y: auto;
   overflow-x: hidden;
-  transition: transform 0.3s ease;
+  transition: left 0.3s ease;
 }
 
-.sidebar-logo {
-  padding: 10px 10px 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  background: #fff;
-  flex-shrink: 0;
-}
-
-.sidebar-logo-image {
-  width: 100px;
-  height: 100px;
-  object-fit: contain;
-  border-radius: 4px;
-}
-
-.sidebar-logo-divider {
-  display: none;
-}
-
-.sidebar-logo-text {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1px;
-}
-
-.sidebar-logo-title {
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: #0055b3;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-
-.sidebar-logo-sub {
-  font-size: 0.6rem;
-  font-weight: 600;
-  color: #555;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
+.sidebar.sidebar-open {
+  left: 0;
 }
 
 .sidebar-menu {
@@ -98,19 +59,20 @@
 }
 
 .sidebar-overlay {
-  display: none;
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.45);
-  z-index: 999;
+  z-index: 1099;
+  display: none;
 }
 
+/* Hamburger: visible on mobile by default */
 .sidebar-hamburger {
-  display: none;
+  display: flex;
   position: fixed;
-  top: calc(62px + 10px);
+  top: 46px;
   left: 12px;
-  z-index: 1100;
+  z-index: 2100;
   background: #0055b3;
   border: none;
   border-radius: 6px;
@@ -132,18 +94,24 @@
   border-radius: 2px;
 }
 
-@media screen and (max-width: 768px) {
+/* Show overlay when sidebar is open on mobile */
+.sidebar.sidebar-open ~ .sidebar-overlay,
+.sidebar-overlay.active {
+  display: block;
+}
+
+/* Desktop: sidebar always visible, hamburger hidden */
+@media (min-width: 1024px) {
   .sidebar {
-    transform: translateX(-100%);
-    width: 200px;
+    left: 0;
   }
-  .sidebar.sidebar-open {
-    transform: translateX(0);
-  }
-  .sidebar-overlay {
-    display: block;
-  }
+
   .sidebar-hamburger {
-    display: flex;
+    display: none;
+  }
+
+  .sidebar-overlay {
+    display: none !important;
   }
 }
+

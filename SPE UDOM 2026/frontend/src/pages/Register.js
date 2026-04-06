@@ -5,6 +5,7 @@ import { api } from '../utils/api';
 import Toast from '../components/Toast';
 import AuthSlideshow from '../components/AuthSlideshow';
 import TopBanner from '../components/TopBanner';
+import PageHeader from '../components/PageHeader';
 import './Auth.css';
 
 const normalizeErrors = data => {
@@ -51,6 +52,7 @@ const Register = () => {
   return (
     <div className="auth-wrapper">
       <TopBanner />
+      <PageHeader />
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
       {/* Left — Slideshow */}

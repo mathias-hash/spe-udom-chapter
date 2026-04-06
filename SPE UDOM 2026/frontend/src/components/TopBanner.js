@@ -11,7 +11,6 @@ const TopBanner = () => (
         <span className="top-banner-text" aria-hidden="true">{TEXT}</span>
       </div>
     </div>
-    <div className="top-tagline">Solutions. People. Energy.</div>
   </>
 );
 

@@ -2,7 +2,7 @@
   min-height: 100vh;
   position: relative;
   background: #f5f7fb;
-  padding-top: 36px;
+  padding-top: 96px;
 }
 
 /* Top slideshow panel */
@@ -136,6 +136,10 @@
 }
 
 .auth-switch a:hover { text-decoration: underline; }
+
+.auth-wrapper .page-header {
+  left: 0 !important;
+}
 
 @media (max-width: 480px) {
   .form-row { grid-template-columns: 1fr; }

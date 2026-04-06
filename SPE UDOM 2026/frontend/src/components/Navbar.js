@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import logo from '../assets/spe-udom-logo.png';
 import TopBanner from './TopBanner';
 import './Navbar.css';
 
@@ -27,16 +26,8 @@ const Navbar = () => {
       <button className="sidebar-hamburger" onClick={() => setOpen(o => !o)} aria-label="Toggle menu">
         <span /><span /><span />
       </button>
-      {open && <div className="sidebar-overlay" onClick={close} />}
+      <div className={`sidebar-overlay${open ? ' active' : ''}`} onClick={close} />
       <div className={`sidebar${open ? ' sidebar-open' : ''}`}>
-        <div className="sidebar-logo">
-          <img src={logo} alt="SPE UDOM" className="sidebar-logo-image" />
-          <div className="sidebar-logo-divider" />
-          <div className="sidebar-logo-text">
-            <span className="sidebar-logo-title">SPE UDOM</span>
-            <span className="sidebar-logo-sub">Student Chapter</span>
-          </div>
-        </div>
         <ul className="sidebar-menu">
           {navItems.map(({ path, label }) => (
             <li key={path}>

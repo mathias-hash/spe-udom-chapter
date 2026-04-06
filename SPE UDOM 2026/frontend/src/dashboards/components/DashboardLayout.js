@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import logo from '../../assets/spe-udom-logo.png';
 import SiteFooter from '../../components/SiteFooter';
 import TopBanner from '../../components/TopBanner';
+import PageHeader from '../../components/PageHeader';
 import './DashboardLayout.css';
 
 const menuByRole = {
@@ -73,18 +73,11 @@ const DashboardLayout = ({ children }) => {
   return (
     <div className="dash-wrapper">
       <TopBanner />
+      <PageHeader />
       {sidebarOpen && window.innerWidth < 768 && (
         <div className="dash-sidebar-overlay" onClick={() => setSidebarOpen(false)} />
       )}
       <aside className={`dash-sidebar ${sidebarOpen ? '' : 'closed'}`}>
-        <div className="dash-logo">
-          <img src={logo} alt="SPE UDOM" className="dash-logo-image" />
-          <div className="dash-logo-divider" />
-          <div className="dash-logo-text">
-            <span className="dash-logo-title">SPE UDOM</span>
-            <span className="dash-logo-sub">Student Chapter</span>
-          </div>
-        </div>
         <div className="dash-role-badge">{user?.role?.replace('_', ' ').toUpperCase()}</div>
         <nav className="dash-nav">
           {menu.map(({ path, label }) => (

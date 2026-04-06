@@ -21,6 +21,7 @@ import AdminDashboard from './dashboards/AdminDashboard';
 import PresidentDashboard from './dashboards/PresidentDashboard';
 import SecretaryDashboard from './dashboards/SecretaryDashboard';
 import MemberDashboard from './dashboards/MemberDashboard';
+import PageHeader from './components/PageHeader';
 import './App.css';
 
 const DashboardRouter = () => {
@@ -35,6 +36,7 @@ const DashboardRouter = () => {
 const PublicLayout = () => (
   <>
     <Navbar />
+    <PageHeader />
     <div className="main-content">
       <Routes>
         <Route path="/" element={<Home />} />

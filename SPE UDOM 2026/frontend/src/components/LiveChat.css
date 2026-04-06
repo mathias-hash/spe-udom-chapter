@@ -51,8 +51,8 @@
 
 /* Chat Window */
 .livechat-window {
-  width: min(300px, calc(100vw - 95px - 36px));
-  height: min(360px, calc(100vh - 120px));
+  width: min(420px, calc(100vw - 95px - 36px));
+  height: min(600px, calc(100vh - 120px));
   max-height: calc(100vh - 120px);
   background: #fff;
   border-radius: 12px;
@@ -280,6 +280,6 @@
 .livechat-send:disabled { opacity: 0.4; cursor: not-allowed; }
 
 @media (max-width: 480px) {
-  .livechat-window { width: min(190px, calc(100vw - 18px)); height: 320px; }
+  .livechat-window { width: min(340px, calc(100vw - 18px)); height: calc(100vh - 100px); }
   .livechat-wrap { bottom: 8px; right: 8px; }
 }

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Spinner from '../components/Spinner';
+import { API_BASE } from '../utils/api';
 import './Publication.css';
 
 const ITEMS_PER_PAGE = 6;
