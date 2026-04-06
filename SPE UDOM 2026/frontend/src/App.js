@@ -60,8 +60,8 @@ function App() {
         <ProfileWidget />
         <LiveChat />
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Navigate to="/" />} />
+          <Route path="/register" element={<Navigate to="/" />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:uidb64/:token" element={<ResetPassword />} />
           <Route path="/dashboard/*" element={<DashboardRouter />} />

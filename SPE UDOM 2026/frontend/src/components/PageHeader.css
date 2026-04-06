@@ -62,3 +62,103 @@
 @media (max-width: 600px) {
   .page-header-tagline { display: none; }
 }
+
+
+/* Auth section top-right */
+.ph-auth { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+.ph-auth-btns { display: flex; gap: 8px; }
+
+.ph-btn-login {
+  padding: 6px 16px; border-radius: 20px; border: 2px solid #0055b3;
+  background: transparent; color: #0055b3; font-weight: 700; font-size: 0.82rem; cursor: pointer;
+  transition: all 0.2s;
+}
+.ph-btn-login:hover { background: #0055b3; color: #fff; }
+
+.ph-btn-register {
+  padding: 6px 16px; border-radius: 20px; border: none;
+  background: #0055b3; color: #fff; font-weight: 700; font-size: 0.82rem; cursor: pointer;
+  transition: background 0.2s;
+}
+.ph-btn-register:hover { background: #003d8f; }
+
+/* Avatar */
+.ph-avatar-wrap { position: relative; }
+.ph-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(135deg, #0f766e, #0284c7);
+  color: #fff; font-weight: 800; font-size: 1rem;
+  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+
+/* Dropdown */
+.ph-dropdown {
+  position: absolute; top: 46px; right: 0; min-width: 160px;
+  background: #fff; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.14);
+  border: 1px solid #e0eaf8; z-index: 2000;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.ph-drop-name {
+  padding: 10px 14px; font-size: 0.82rem; font-weight: 700;
+  color: #333; border-bottom: 1px solid #f0f0f0;
+}
+.ph-dropdown button {
+  padding: 10px 14px; background: none; border: none;
+  text-align: left; font-size: 0.84rem; cursor: pointer; color: #333;
+}
+.ph-dropdown button:hover { background: #f5f7fb; }
+
+/* Modal backdrop */
+.ph-modal-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  z-index: 3000; display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+}
+
+/* Modal card */
+.ph-modal {
+  background: #fff; border-radius: 16px; padding: 28px 24px 24px;
+  width: 100%; max-width: 420px; position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  max-height: 90vh; overflow-y: auto;
+}
+.ph-modal h3 { color: #0066cc; font-size: 1.2rem; font-weight: 800; margin: 0 0 4px; }
+.ph-modal-sub { color: #666; font-size: 0.84rem; margin: 0 0 16px; }
+.ph-modal-close {
+  position: absolute; top: 12px; right: 14px;
+  background: none; border: none; font-size: 1.1rem; cursor: pointer; color: #888;
+}
+.ph-modal-close:hover { color: #333; }
+
+/* Modal form */
+.ph-modal-form { display: flex; flex-direction: column; gap: 10px; }
+.ph-modal-form input,
+.ph-modal-form select {
+  width: 100%; padding: 9px 12px; border: 1.5px solid #ddd;
+  border-radius: 8px; font-size: 0.9rem; outline: none;
+  transition: border-color 0.2s;
+}
+.ph-modal-form input:focus,
+.ph-modal-form select:focus { border-color: #0066cc; }
+.ph-modal-form button[type="submit"] {
+  padding: 10px; background: #0066cc; color: #fff;
+  border: none; border-radius: 8px; font-weight: 700;
+  font-size: 0.95rem; cursor: pointer; margin-top: 4px;
+  transition: background 0.2s;
+}
+.ph-modal-form button[type="submit"]:hover:not(:disabled) { background: #0052a3; }
+.ph-modal-form button[type="submit"]:disabled { opacity: 0.7; cursor: not-allowed; }
+
+.ph-modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ph-modal-row > div { display: flex; flex-direction: column; gap: 4px; }
+.ph-modal-row input,
+.ph-modal-row select { width: 100%; }
+
+.ph-error { color: #e53e3e; font-size: 0.78rem; }
+
+.ph-modal-switch {
+  text-align: center; margin-top: 10px; font-size: 0.86rem; color: #555;
+}
+.ph-modal-switch span { color: #0066cc; font-weight: 600; cursor: pointer; }
+.ph-modal-switch span:hover { text-decoration: underline; }
