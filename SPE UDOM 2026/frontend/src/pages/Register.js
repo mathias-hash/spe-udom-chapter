@@ -62,6 +62,10 @@ const Register = () => {
 
       {/* Right — Form */}
       <div className="auth-form-panel">
+        <div className="auth-branding">
+          <div className="auth-branding-title">SPE UDOM STUDENTS CHAPTER</div>
+          <div className="auth-branding-sub">Empowering the next generation of engineers at the University of Dodoma</div>
+        </div>
         <div className="auth-card">
           <div className="auth-header">
             <h2>Join SPE UDOM Student Chapter</h2>
@@ -70,18 +74,44 @@ const Register = () => {
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
               <label>Full Name</label>
-              <input name="full_name" value={form.full_name} onChange={handleChange} placeholder="Full Name" required />
+              <input
+                name="full_name"
+                value={form.full_name}
+                onChange={handleChange}
+                placeholder="Full Name"
+                autoComplete="name"
+                required
+              />
               {errors.full_name && <span className="error">{errors.full_name}</span>}
             </div>
             <div className="form-group">
               <label>Email</label>
-              <input type="email" name="email" value={form.email} onChange={handleChange} placeholder="Email" required />
+              <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="Email"
+                autoComplete="email"
+                autoCapitalize="none"
+                autoCorrect="off"
+                inputMode="email"
+                required
+              />
               {errors.email && <span className="error">{errors.email}</span>}
             </div>
             <div className="form-row">
               <div className="form-group">
                 <label>Phone (Optional)</label>
-                <input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="Phone" />
+                <input
+                  type="tel"
+                  name="phone"
+                  value={form.phone}
+                  onChange={handleChange}
+                  placeholder="Phone"
+                  autoComplete="tel"
+                  inputMode="tel"
+                />
                 {errors.phone && <span className="error">{errors.phone}</span>}
               </div>
               <div className="form-group">
@@ -99,12 +129,28 @@ const Register = () => {
             <div className="form-row">
               <div className="form-group">
                 <label>Password</label>
-                <input type="password" name="password" value={form.password} onChange={handleChange} placeholder="Min 12 chars" required />
+                <input
+                  type="password"
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  placeholder="Min 12 chars"
+                  autoComplete="new-password"
+                  required
+                />
                 {errors.password && <span className="error">{errors.password}</span>}
               </div>
               <div className="form-group">
                 <label>Confirm Password</label>
-                <input type="password" name="confirm_password" value={form.confirm_password} onChange={handleChange} placeholder="Confirm" required />
+                <input
+                  type="password"
+                  name="confirm_password"
+                  value={form.confirm_password}
+                  onChange={handleChange}
+                  placeholder="Confirm"
+                  autoComplete="new-password"
+                  required
+                />
                 {errors.confirm_password && <span className="error">{errors.confirm_password}</span>}
               </div>
             </div>

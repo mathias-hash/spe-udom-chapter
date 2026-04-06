@@ -58,6 +58,10 @@ const Login = () => {
 
       {/* Right — Form */}
       <div className="auth-form-panel">
+        <div className="auth-branding">
+          <div className="auth-branding-title">SPE UDOM STUDENTS CHAPTER</div>
+          <div className="auth-branding-sub">Empowering the next generation of engineers at the University of Dodoma</div>
+        </div>
         <div className="auth-card">
           <div className="auth-header">
             <h2>Welcome Back</h2>
@@ -66,12 +70,31 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
               <label>Email</label>
-              <input type="email" name="email" value={form.email} onChange={handleChange} placeholder="Email" required />
+              <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="Email"
+                autoComplete="email"
+                autoCapitalize="none"
+                autoCorrect="off"
+                inputMode="email"
+                required
+              />
               {errors.email && <span className="error">{errors.email}</span>}
             </div>
             <div className="form-group">
               <label>Password</label>
-              <input type="password" name="password" value={form.password} onChange={handleChange} placeholder="Password" required />
+              <input
+                type="password"
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                placeholder="Password"
+                autoComplete="current-password"
+                required
+              />
               {errors.password && <span className="error">{errors.password}</span>}
             </div>
             {errors.non_field_errors && <p className="error">{errors.non_field_errors}</p>}

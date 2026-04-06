@@ -150,6 +150,30 @@
 
 .auth-switch a:hover { text-decoration: underline; }
 
+.auth-branding {
+  text-align: center;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+  max-width: 400px;
+  width: 100%;
+}
+
+.auth-branding-title {
+  font-size: 1.3rem;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.auth-branding-sub {
+  font-size: 0.82rem;
+  font-weight: 500;
+  opacity: 0.92;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
 .auth-wrapper .page-header {
   left: 0 !important;
 }
@@ -186,5 +210,8 @@
     background: transparent;
     padding: 110px 20px 24px;
     align-items: center;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 12px;
   }
 }
