@@ -3,22 +3,23 @@
   top: 36px;
   left: 0;
   right: 0;
-  height: 60px;
+  height: 72px;
   background: #fff;
   border-bottom: 1px solid #e0eaf8;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 0 20px;
+  gap: 14px;
+  padding: 0 20px 0 16px;
   z-index: 900;
   box-shadow: 0 2px 8px rgba(0,60,140,0.07);
 }
 
 .page-header-logo {
-  width: 44px;
-  height: 44px;
+  width: 76px;
+  height: 76px;
   object-fit: contain;
   flex-shrink: 0;
+  margin-left: 0;
 }
 
 .page-header-text {
@@ -56,13 +57,24 @@
 }
 
 @media (min-width: 1024px) {
-  .page-header { left: 240px; }
+  .page-header {
+    padding-left: 248px;
+  }
 }
 
 @media (max-width: 600px) {
+  .page-header {
+    padding-left: 6px;
+    gap: 10px;
+  }
+
+  .page-header-logo {
+    width: 60px;
+    height: 60px;
+  }
+
   .page-header-tagline { display: none; }
 }
-
 
 /* Auth section top-right */
 .ph-auth { margin-left: auto; display: flex; align-items: center; gap: 8px; }
