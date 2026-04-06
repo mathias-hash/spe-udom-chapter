@@ -66,6 +66,8 @@ TRUSTED_ORIGINS = env_list(
     'http://127.0.0.1:3001,'
     'http://0.0.0.0:3001'
 )
+CORS_ALLOWED_ORIGINS = env_list('CORS_ALLOWED_ORIGINS', ','.join(TRUSTED_ORIGINS))
+CSRF_TRUSTED_ORIGINS = env_list('CSRF_TRUSTED_ORIGINS', ','.join(TRUSTED_ORIGINS))
 
 # ─── API SECURITY SETTINGS ─────────────────────────────────────
 API_SECRET_KEY = env('API_SECRET_KEY', default=SECRET_KEY)
@@ -171,7 +173,6 @@ SIMPLE_JWT = {
 }
 
 # ─── CORS CONFIGURATION ─────────────────────────────────────────
-CORS_ALLOWED_ORIGINS = TRUSTED_ORIGINS
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -189,16 +190,16 @@ CORS_EXPOSE_HEADERS = [
     'x-csrftoken',
 ]
 
-CSRF_TRUSTED_ORIGINS = TRUSTED_ORIGINS
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Strict'
 
+REDIS_URL = env('REDIS_URL', default=None)
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
-    } if DEBUG else {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {'hosts': [('127.0.0.1', 6379)]},
+        'CONFIG': {'hosts': [REDIS_URL]},
+    } if REDIS_URL else {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
     },
 }
 
