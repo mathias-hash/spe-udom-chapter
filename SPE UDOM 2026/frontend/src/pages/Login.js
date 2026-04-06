@@ -58,10 +58,6 @@ const Login = () => {
 
       {/* Right — Form */}
       <div className="auth-form-panel">
-        <div className="auth-branding">
-          <div className="auth-branding-title">SPE UDOM STUDENTS CHAPTER</div>
-          <div className="auth-branding-sub">Empowering the next generation of engineers at the University of Dodoma</div>
-        </div>
         <div className="auth-card">
           <div className="auth-header">
             <h2>Welcome Back</h2>
