@@ -2,7 +2,7 @@
   min-height: 100vh;
   position: relative;
   background: #f5f7fb;
-  padding-top: 100px;
+  padding-top: 36px;
   display: flex;
   flex-direction: column;
 }
@@ -40,7 +40,7 @@
 .auth-card {
   background: #ffffff;
   border-radius: 18px;
-  padding: 18px 18px 20px;
+  padding: 14px 18px 16px;
   width: 100%;
   max-width: 420px;
   box-shadow: 0 16px 40px rgba(0,0,0,0.14);
@@ -49,12 +49,12 @@
 
 .auth-header {
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .auth-header h2 {
   color: #0066cc;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 800;
   line-height: 1.2;
   margin: 0;
@@ -62,15 +62,15 @@
 
 .auth-header p {
   color: #666;
-  margin-top: 6px;
-  font-size: 0.9rem;
-  line-height: 1.5;
+  margin-top: 4px;
+  font-size: 0.82rem;
+  line-height: 1.4;
 }
 
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 7px;
 }
 
 .form-row {
@@ -82,12 +82,12 @@
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 3px;
   min-width: 0;
 }
 
 .form-group label {
-  font-size: 0.84rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: #333;
 }
@@ -95,11 +95,11 @@
 .form-group input,
 .form-group select {
   width: 100%;
-  min-height: 48px;
-  padding: 12px 14px;
+  min-height: 40px;
+  padding: 8px 12px;
   border: 1.5px solid #ddd;
   border-radius: 10px;
-  font-size: 16px;
+  font-size: 15px;
   outline: none;
   background: #fff;
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -118,9 +118,9 @@
 }
 
 .auth-btn {
-  margin-top: 6px;
-  min-height: 48px;
-  padding: 12px 16px;
+  margin-top: 4px;
+  min-height: 42px;
+  padding: 9px 16px;
   background: #0066cc;
   color: #fff;
   border: none;
@@ -136,9 +136,9 @@
 
 .auth-switch {
   text-align: center;
-  margin-top: 10px;
-  font-size: 0.92rem;
-  line-height: 1.5;
+  margin-top: 6px;
+  font-size: 0.88rem;
+  line-height: 1.4;
   color: #555;
 }
 
@@ -151,7 +151,7 @@
 .auth-switch a:hover { text-decoration: underline; }
 
 .auth-wrapper .page-header {
-  left: 0 !important;
+  display: none;
 }
 
 @media (max-width: 480px) {
@@ -184,7 +184,7 @@
     position: absolute;
     inset: 0;
     background: transparent;
-    padding: 140px 20px 24px;
+    padding: 80px 20px 24px;
     align-items: center;
   }
 }
