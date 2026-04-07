@@ -3,7 +3,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell, LabelList
 } from 'recharts';
-import { apiList } from '../utils/api';
+import { API_BASE, apiList } from '../utils/api';
 
 const COLORS = ['#0055b3','#0099ff','#00c49f','#ff8042','#a855f7','#f59e0b','#ef4444','#10b981'];
 
@@ -78,8 +78,11 @@ const ElectionAnalytics = () => {
   useEffect(() => {
     if (!selectedId) return;
     setLoading(true);
-    fetch(`http://localhost:8000/api/public/election/${selectedId}/results/`)
-      .then(r => r.json())
+    fetch(`${API_BASE}/public/election/${selectedId}/results/`)
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
       .then(d => { setResults(d); setLoading(false); })
       .catch(() => setLoading(false));
   }, [selectedId]);

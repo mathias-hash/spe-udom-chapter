@@ -12,7 +12,8 @@ const LiveChat = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput]       = useState('');
   const [sending, setSending]   = useState(false);
-  const [status, setStatus]     = useState('connecting'); // connecting | online | offline
+  const [status, setStatus]     = useState('connecting'); // connecting | online | offline | waking
+  const retryCountRef = useRef(0);
   const [unread, setUnread]     = useState(0);
 
   const openRef    = useRef(false);
@@ -54,6 +55,7 @@ const LiveChat = () => {
 
       setMessages(mapped);
       setStatus('online');
+      retryCountRef.current = 0;
       if (mapped.length) lastIdRef.current = mapped[mapped.length - 1].id;
 
       // start polling
@@ -83,9 +85,13 @@ const LiveChat = () => {
 
     } catch (e) {
       if (!mountedRef.current) return;
-      setStatus('offline');
+      retryCountRef.current += 1;
+      // First few retries = server waking up (Render free tier cold start)
+      setStatus(retryCountRef.current <= 4 ? 'waking' : 'offline');
+      // Back off: 5s, 8s, 12s, 18s, then 30s
+      const delay = Math.min(5000 * Math.pow(1.5, retryCountRef.current - 1), 30000);
       clearTimeout(retryTimer.current);
-      retryTimer.current = setTimeout(fetchRoom, 5000);
+      retryTimer.current = setTimeout(fetchRoom, delay);
     }
   }, [user, senderName, authHeader]); // eslint-disable-line
 
@@ -146,7 +152,7 @@ const LiveChat = () => {
             <div className="livechat-header-info">
               <strong>SPE UDOM Support</strong>
               <span className="livechat-status" style={{ color: status === 'online' ? '#90ee90' : '#ffa07a' }}>
-                {status === 'connecting' ? 'Connecting...' : status === 'online' ? 'Online' : 'Offline — retrying...'}
+                {status === 'connecting' ? 'Connecting...' : status === 'online' ? 'Online' : status === 'waking' ? 'Starting up, please wait...' : 'Offline — retrying...'}
               </span>
             </div>
             <button className="livechat-close" onClick={() => setOpen(false)}>✕</button>

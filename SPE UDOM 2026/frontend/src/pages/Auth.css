@@ -156,12 +156,23 @@
 
 @media (max-width: 480px) {
   .form-row { grid-template-columns: 1fr; }
-  .auth-wrapper { padding-top: 88px; }
-  .auth-slideshow-panel,
-  .auth-slideshow-panel .auth-slideshow { height: 180px; }
-  .auth-card { padding: 16px; max-width: 100%; border-radius: 16px; }
-  .auth-form-panel { padding: 16px 12px 28px; }
-  .auth-header h2 { font-size: 1.08rem; }
+  .auth-wrapper {
+    padding-top: 88px;
+    background: linear-gradient(160deg, #003d7a 0%, #0066cc 100%);
+  }
+  .auth-slideshow-panel { display: none; }
+  .auth-form-panel {
+    padding: 20px 14px 32px;
+    background: transparent;
+    align-items: flex-start;
+  }
+  .auth-card {
+    padding: 20px 16px;
+    max-width: 100%;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+  }
+  .auth-header h2 { font-size: 1.1rem; }
   .auth-header p { font-size: 0.84rem; }
   .auth-switch { font-size: 0.84rem; }
 }

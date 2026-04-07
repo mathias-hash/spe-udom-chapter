@@ -40,6 +40,7 @@ if not DEBUG and env.bool('ENFORCE_HTTPS', default=True):
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
@@ -47,6 +48,7 @@ else:
     SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
+    SECURE_PROXY_SSL_HEADER = None
 
 
 def env_list(name, default):
@@ -223,9 +225,9 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # ─── FILE UPLOAD SECURITY ──────────────────────────────────────
 MAX_UPLOAD_SIZE = 5242880  # 5MB
-ALLOWED_UPLOAD_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx', 'xls', 'xlsx']
-ALLOWED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif']
-ALLOWED_DOCUMENT_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx']
+ALLOWED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp']
+ALLOWED_DOCUMENT_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt']
+ALLOWED_UPLOAD_EXTENSIONS = sorted(set(ALLOWED_IMAGE_EXTENSIONS + ALLOWED_DOCUMENT_EXTENSIONS))
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = MAX_UPLOAD_SIZE
 FILE_UPLOAD_MAX_MEMORY_SIZE = MAX_UPLOAD_SIZE

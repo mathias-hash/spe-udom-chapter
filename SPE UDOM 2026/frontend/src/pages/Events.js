@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { FiCalendar, FiImage, FiPlus, FiEdit2, FiTrash2, FiMapPin, FiClock, FiX, FiAlertCircle, FiUpload } from 'react-icons/fi';
 import Spinner from '../components/Spinner';
 import Toast from '../components/Toast';
-import { API_BASE } from '../utils/api';
+import { API_BASE, api } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import './Events.css';
 
@@ -36,11 +36,15 @@ const Events = () => {
 
   const isGeneralSecretary = user?.role === 'general_secretary' || user?.role === 'admin' || user?.role === 'president';
 
+  const showToast = React.useCallback((message, type) => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  }, []);
+
   const fetchEvents = React.useCallback(() => {
     setLoading(true);
     const now = new Date().toISOString();
-    const status = 'approved';
-    const params = new URLSearchParams({ search: query, page, page_size: ITEMS_PER_PAGE, status });
+    const params = new URLSearchParams({ search: query, page, page_size: ITEMS_PER_PAGE });
     let url = `${API_BASE}/public/events/?${params}`;
     if (tab === 'past') {
       url += '&date_before=' + now;
@@ -48,21 +52,30 @@ const Events = () => {
       url += '&date_after=' + now;
     }
     fetch(url)
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
       .then((d) => {
         const evs = Array.isArray(d) ? d : (d.results || []);
         setEvents(evs);
         setTotal(d.count || evs.length);
       })
-      .catch(() => { setEvents([]); showToast('Error loading events', 'error'); })
+      .catch(() => {
+        setEvents([]);
+        showToast('Error loading events', 'error');
+      })
       .finally(() => setLoading(false));
-  }, [query, page, tab]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [query, page, tab, showToast]);
 
   useEffect(() => { fetchEvents(); }, [fetchEvents]);
 
   const fetchEventPhotos = (eventId) => {
     fetch(`${API_BASE}/public/events/${eventId}/photos/`)
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
       .then((d) => {
         setEventPhotos(Array.isArray(d) ? d : (d.results || []));
         setShowPhotos(true);
@@ -73,13 +86,12 @@ const Events = () => {
       });
   };
 
-  const handleCreateEvent = () => {
+  const handleCreateEvent = async () => {
     if (!formData.title || !formData.date || !formData.location) {
       showToast('Please fill in all required fields', 'error');
       return;
     }
 
-    const token = localStorage.getItem('access');
     const payload = {
       title: formData.title,
       description: formData.description,
@@ -88,36 +100,30 @@ const Events = () => {
       status: 'pending'
     };
 
-    fetch(`${API_BASE}/events/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(payload)
-    })
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.id) {
-          showToast('Event created successfully (pending approval)', 'success');
-          setShowModal(false);
-          setFormData({ title: '', description: '', location: '', date: '' });
-          fetchEvents();
-        }
-      })
-      .catch((err) => {
-        console.error('Error creating event:', err);
-        showToast('Error creating event', 'error');
+    try {
+      const response = await api('/events/', {
+        method: 'POST',
+        body: JSON.stringify(payload),
       });
+      if (!response.ok || !response.data?.id) {
+        throw new Error(response.data?.error || 'Failed to create event');
+      }
+      showToast('Event created successfully (pending approval)', 'success');
+      setShowModal(false);
+      setFormData({ title: '', description: '', location: '', date: '' });
+      fetchEvents();
+    } catch (err) {
+      console.error('Error creating event:', err);
+      showToast('Error creating event', 'error');
+    }
   };
 
-  const handleUpdateEvent = () => {
+  const handleUpdateEvent = async () => {
     if (!selectedEvent || !formData.title || !formData.date || !formData.location) {
       showToast('Please fill in all required fields', 'error');
       return;
     }
 
-    const token = localStorage.getItem('access');
     const payload = {
       title: formData.title,
       description: formData.description,
@@ -125,77 +131,66 @@ const Events = () => {
       date: formData.date
     };
 
-    fetch(`${API_BASE}/events/${selectedEvent.id}/`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(payload)
-    })
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.id) {
-          showToast('Event updated successfully', 'success');
-          setShowModal(false);
-          setSelectedEvent(null);
-          setFormData({ title: '', description: '', location: '', date: '' });
-          fetchEvents();
-        }
-      })
-      .catch((err) => {
-        console.error('Error updating event:', err);
-        showToast('Error updating event', 'error');
+    try {
+      const response = await api(`/events/${selectedEvent.id}/`, {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
       });
+      if (!response.ok || !response.data?.id) {
+        throw new Error(response.data?.error || 'Failed to update event');
+      }
+      showToast('Event updated successfully', 'success');
+      setShowModal(false);
+      setSelectedEvent(null);
+      setFormData({ title: '', description: '', location: '', date: '' });
+      fetchEvents();
+    } catch (err) {
+      console.error('Error updating event:', err);
+      showToast('Error updating event', 'error');
+    }
   };
 
-  const handleCancelEvent = () => {
+  const handleCancelEvent = async () => {
     if (!selectedEvent || !cancelReason.trim()) {
       showToast('Please provide a cancellation reason', 'error');
       return;
     }
 
-    const token = localStorage.getItem('access');
-    fetch(`${API_BASE}/events/${selectedEvent.id}/`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ status: 'cancelled', cancel_reason: cancelReason })
-    })
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.id) {
-          showToast('Event cancelled successfully', 'success');
-          setShowModal(false);
-          setCancelReason('');
-          setSelectedEvent(null);
-          fetchEvents();
-        }
-      })
-      .catch((err) => {
-        console.error('Error cancelling event:', err);
-        showToast('Error cancelling event', 'error');
+    try {
+      const response = await api(`/events/${selectedEvent.id}/`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'cancelled', cancel_reason: cancelReason })
       });
+      if (!response.ok || !response.data?.id) {
+        throw new Error(response.data?.error || 'Failed to cancel event');
+      }
+      showToast('Event cancelled successfully', 'success');
+      setShowModal(false);
+      setCancelReason('');
+      setSelectedEvent(null);
+      fetchEvents();
+    } catch (err) {
+      console.error('Error cancelling event:', err);
+      showToast('Error cancelling event', 'error');
+    }
   };
 
-  const handleDeleteEvent = (eventId) => {
+  const handleDeleteEvent = async (eventId) => {
     if (!window.confirm('Are you sure you want to delete this event?')) return;
 
-    const token = localStorage.getItem('access');
-    fetch(`${API_BASE}/events/${eventId}/`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-      .then(() => {
-        showToast('Event deleted successfully', 'success');
-        fetchEvents();
-      })
-      .catch((err) => {
-        console.error('Error deleting event:', err);
-        showToast('Error deleting event', 'error');
+    try {
+      const response = await api(`/events/${eventId}/`, {
+        method: 'DELETE',
       });
+      if (!response.ok && response.status !== 204) {
+        throw new Error(response.data?.error || 'Failed to delete event');
+      }
+      showToast('Event deleted successfully', 'success');
+      fetchEvents();
+    } catch (err) {
+      console.error('Error deleting event:', err);
+      showToast('Error deleting event', 'error');
+    }
   };
 
   const handleUploadPhoto = (eventId) => {
@@ -211,13 +206,17 @@ const Events = () => {
       formDataPhoto.append('event', eventId);
       formDataPhoto.append('caption', '');
 
-      const token = localStorage.getItem('access');
       fetch(`${API_BASE}/events/${eventId}/photos/`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('spe_access') || ''}`,
+        },
         body: formDataPhoto
       })
-        .then((r) => r.json())
+        .then((r) => {
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          return r.json();
+        })
         .then((d) => {
           if (d.id) {
             showToast('Photo uploaded successfully', 'success');
@@ -230,11 +229,6 @@ const Events = () => {
         });
     };
     input.click();
-  };
-
-  const showToast = (message, type) => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
   };
 
   const handleSearch = (e) => {
@@ -332,7 +326,7 @@ const Events = () => {
                     <p className="ev-time"><FiClock /> {new Date(ev.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                     <p className="ev-desc">{ev.description?.substring(0, 80)}...</p>
                     <div className="ev-footer">
-                      <span className="ev-reg">{ev.registrations?.length || 0} registered</span>
+                      <span className="ev-reg">{ev.registration_count || ev.registrations?.length || 0} registered</span>
                     </div>
                     <div className="ev-actions">
                       {tab === 'past' && (

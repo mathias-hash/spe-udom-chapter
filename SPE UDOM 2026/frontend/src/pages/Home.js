@@ -88,7 +88,16 @@ const Home = () => {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    fetch(`${API_BASE}/public/events/`).then(r => r.json()).then(d => setEvents(Array.isArray(d) ? d.slice(0, 3) : [])).catch(() => {});
+    fetch(`${API_BASE}/public/events/?page=1&page_size=3`)
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then(d => {
+        const list = Array.isArray(d) ? d : (d.results || []);
+        setEvents(list.slice(0, 3));
+      })
+      .catch(() => {});
   }, []);
 
   return (
