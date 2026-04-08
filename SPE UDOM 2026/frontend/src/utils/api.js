@@ -1,4 +1,16 @@
-export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
+const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1']);
+
+const getRuntimeApiBaseUrl = () => {
+  const configuredBase = process.env.REACT_APP_API_BASE_URL?.trim();
+  if (configuredBase) return configuredBase;
+  if (typeof window === 'undefined') return 'http://localhost:8000';
+  const { hostname } = window.location;
+  if (LOCAL_HOSTS.has(hostname)) return 'http://localhost:8000';
+  // On production with no env var set, same origin (assumes backend served from same domain)
+  return `${window.location.protocol}//${window.location.host}`;
+};
+
+export const API_BASE_URL = getRuntimeApiBaseUrl();
 export const API_BASE = `${API_BASE_URL}/api`;
 
 // Token refresh configuration
