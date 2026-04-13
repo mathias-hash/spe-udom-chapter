@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../utils/api';
 import './LiveChat.css';
 
-const API = (process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000').replace(/\/$/, '');
+const API = API_BASE_URL.replace(/\/$/, '');
 const POLL_MS = 4000;
 
 const LiveChat = () => {
@@ -155,7 +156,7 @@ const LiveChat = () => {
                 {status === 'connecting' ? 'Connecting...' : status === 'online' ? 'Online' : status === 'waking' ? 'Starting up, please wait...' : 'Offline — retrying...'}
               </span>
             </div>
-            <button className="livechat-close" onClick={() => setOpen(false)}>✕</button>
+            <button className="livechat-close" onClick={() => setOpen(false)} aria-label="Close chat">&times;</button>
           </div>
 
           <div className="livechat-messages">
@@ -219,7 +220,7 @@ const LiveChat = () => {
       )}
 
       <button className="livechat-toggle" onClick={() => setOpen(o => !o)}>
-        {open ? '✕' : 'Chat'}
+        {open ? 'x' : 'Chat'}
         {!open && unread > 0 && <span className="livechat-badge">{unread}</span>}
       </button>
     </div>

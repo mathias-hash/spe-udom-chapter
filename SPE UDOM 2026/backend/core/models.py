@@ -4,7 +4,7 @@ import re
 
 
 ACADEMIC_YEAR_START = 2024
-DEFAULT_VISIBLE_ACADEMIC_YEAR_END = 2026
+DEFAULT_VISIBLE_ACADEMIC_YEAR_END = 2026  # Current year is 2026, so max visible is 2026/2027
 ACADEMIC_YEAR_PATTERN = re.compile(r'^\d{4}/\d{4}$')
 
 
@@ -200,16 +200,10 @@ def is_valid_academic_year_format(year):
 
 
 def available_academic_years():
-    # Base range: 2024/2025 to 2026/2027 only
+    # Only show base range: 2024/2025 to 2026/2027
+    # Advanced years (beyond 2026/2027) are NOT shown in the dropdown until the next year button is explicitly clicked
     base = {f'{y}/{y + 1}' for y in range(ACADEMIC_YEAR_START, DEFAULT_VISIBLE_ACADEMIC_YEAR_END + 1)}
-
-    # Only add years that have actual LeadershipMember records beyond the base range
-    advanced = set()
-    for year in LeadershipMember.objects.values_list('year', flat=True).distinct():
-        if is_valid_academic_year_format(year) and year not in base:
-            advanced.add(year)
-
-    return sorted(base | advanced)
+    return sorted(base)
 
 
 def latest_available_academic_year():

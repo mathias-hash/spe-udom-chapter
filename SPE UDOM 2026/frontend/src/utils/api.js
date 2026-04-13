@@ -1,13 +1,28 @@
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1']);
+const DEV_FRONTEND_PORTS = new Set(['3000', '3001', '5173', '4173']);
+
+const isPrivateIpv4Host = hostname => (
+  /^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname) ||
+  /^192\.168\.\d{1,3}\.\d{1,3}$/.test(hostname) ||
+  /^172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}$/.test(hostname)
+);
+
+const isDevelopmentFrontendHost = location => {
+  if (!location) return false;
+  const { hostname, port } = location;
+  return LOCAL_HOSTS.has(hostname) || isPrivateIpv4Host(hostname) || DEV_FRONTEND_PORTS.has(port);
+};
 
 const getRuntimeApiBaseUrl = () => {
-  const configuredBase = process.env.REACT_APP_API_BASE_URL?.trim();
+  const configuredBase = process.env.REACT_APP_API_BASE_URL?.trim().replace(/\/$/, '');
   if (configuredBase) return configuredBase;
   if (typeof window === 'undefined') return 'http://localhost:8000';
-  const { hostname } = window.location;
-  if (LOCAL_HOSTS.has(hostname)) return 'http://localhost:8000';
+  const { hostname, protocol, host } = window.location;
+  if (isDevelopmentFrontendHost(window.location)) {
+    return `${protocol}//${hostname}:8000`;
+  }
   // On production with no env var set, same origin (assumes backend served from same domain)
-  return `${window.location.protocol}//${window.location.host}`;
+  return `${protocol}//${host}`;
 };
 
 export const API_BASE_URL = getRuntimeApiBaseUrl();
@@ -169,7 +184,13 @@ export const api = async (endpoint, options = {}, retryAttempt = 0) => {
     return { ok: res.ok, status: res.status, data };
   } catch (error) {
     console.error('API request error:', error);
-    return { ok: false, status: 0, data: { error: 'Network error' } };
+    return {
+      ok: false,
+      status: 0,
+      data: {
+        error: `Cannot connect to the server at ${API_BASE_URL}. Check that the backend is running and reachable.`,
+      },
+    };
   }
 };
 

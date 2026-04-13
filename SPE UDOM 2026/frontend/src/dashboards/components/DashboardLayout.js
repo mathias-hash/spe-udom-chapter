@@ -10,6 +10,7 @@ const menuByRole = {
   admin: [
     { path: '/dashboard', label: 'Overview' },
     { path: '/dashboard/users', label: 'Manage Users' },
+    { path: '/dashboard/online-users', label: '🟢 Online Users' },
     { path: '/dashboard/events', label: 'Manage Events' },
     { path: '/dashboard/announcements', label: 'Announcements' },
     { path: '/dashboard/publications', label: 'Publications' },

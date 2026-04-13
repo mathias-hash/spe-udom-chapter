@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import DashboardLayout from './components/DashboardLayout';
+import ProfileExperience from './components/ProfileExperience';
 import AnnualReportPage from './components/AnnualReportPage';
 import Toast from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
@@ -339,8 +340,10 @@ const Profile = () => {
     <>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
+      <ProfileExperience user={user} roleLabel="Member" accent="blue" />
+
       {/* Update Profile */}
-      <div className="dash-form" style={{ marginBottom: 24 }}>
+      <div className="dash-form" id="profile-edit-section" style={{ marginBottom: 24 }}>
         <h3>Update Profile</h3>
         <form onSubmit={submit}>
           <div className="form-group"><label>Email (cannot change)</label><input value={user?.email} disabled style={{ background: '#f5f5f5' }} /></div>
@@ -358,7 +361,7 @@ const Profile = () => {
       </div>
 
       {/* Change Password */}
-      <div className="dash-form" style={{ maxWidth: '100%' }}>
+      <div className="dash-form" id="profile-security-section" style={{ maxWidth: '100%' }}>
         <h3>Change Password</h3>
         <form onSubmit={changePassword}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>

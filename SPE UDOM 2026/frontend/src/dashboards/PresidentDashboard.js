@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import DashboardLayout from './components/DashboardLayout';
+import ProfileExperience from './components/ProfileExperience';
 import Toast from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../utils/api';
@@ -219,8 +220,10 @@ const Profile = () => {
         </div>
       </div>
 
+      <ProfileExperience user={user} roleLabel="President" accent="violet" />
+
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
-        <div className="dash-form">
+        <div className="dash-form" id="profile-edit-section">
           <h3>Update Information</h3>
           <form onSubmit={submit}>
             <div className="form-group"><label>Email (cannot change)</label><input value={user?.email || ''} disabled style={{ background: '#f5f5f5' }} /></div>
@@ -256,7 +259,7 @@ const Profile = () => {
         </div>
       </div>
 
-      <div className="dash-form" style={{ maxWidth: '100%' }}>
+      <div className="dash-form" id="profile-security-section" style={{ maxWidth: '100%' }}>
         <h3>Change Password</h3>
         <form onSubmit={changePassword}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>

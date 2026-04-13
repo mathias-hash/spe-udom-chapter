@@ -1,9 +1,9 @@
 /* Mobile-first sidebar: hidden off-screen by default */
 .sidebar {
   position: fixed;
-  top: 96px;
+  top: 108px;
   left: -260px;
-  height: calc(100% - 96px);
+  height: calc(100vh - 108px);
   width: 240px;
   background: #0f2342;
   z-index: 1100;
@@ -104,6 +104,8 @@
 @media (min-width: 1024px) {
   .sidebar {
     left: 0;
+    top: 108px;
+    height: calc(100vh - 108px);
   }
 
   .sidebar-hamburger {
@@ -114,4 +116,3 @@
     display: none !important;
   }
 }
-

@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../utils/api';
 import './ChatWidget.css';
 
-const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
+const apiBaseUrl = API_BASE_URL;
 
 // Construct WebSocket URL correctly
 const getWsBaseUrl = () => {

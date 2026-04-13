@@ -106,6 +106,9 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'backend.urls'
 
+# ─── URL CONFIGURATION ──────────────────────────────
+APPEND_SLASH = True  # Auto-append trailing slash to URLs
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import DashboardLayout from './components/DashboardLayout';
+import ProfileExperience from './components/ProfileExperience';
 import AnnualReportPage from './components/AnnualReportPage';
 import Toast from '../components/Toast';
 import Spinner from '../components/Spinner';
@@ -554,6 +555,180 @@ const AdminPublications = () => {
   );
 };
 
+// Online Users Monitoring
+const OnlineUsers = () => {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all'); // 'all', 'online', 'offline'
+  const [autoRefresh, setAutoRefresh] = useState(true);
+
+  const loadUsers = React.useCallback(() => {
+    apiList('/users/').then(d => {
+      setUsers(Array.isArray(d) ? d : (d.results || []));
+      setLoading(false);
+    });
+  }, []);
+
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
+
+  // Auto-refresh every 30 seconds if enabled
+  useEffect(() => {
+    if (!autoRefresh) return;
+    const interval = setInterval(loadUsers, 30000);
+    return () => clearInterval(interval);
+  }, [autoRefresh, loadUsers]);
+
+  const isOnline = (lastLogin) => {
+    if (!lastLogin) return false;
+    const lastLoginTime = new Date(lastLogin).getTime();
+    const currentTime = new Date().getTime();
+    const diffMinutes = (currentTime - lastLoginTime) / (1000 * 60);
+    return diffMinutes < 30; // Online if logged in within last 30 minutes
+  };
+
+  const formatTime = (date) => {
+    if (!date) return 'Never';
+    return new Date(date).toLocaleString();
+  };
+
+  const filtered = users.filter(u => {
+    if (filter === 'online') return isOnline(u.last_login);
+    if (filter === 'offline') return !isOnline(u.last_login);
+    return true;
+  });
+
+  const onlineCount = users.filter(u => isOnline(u.last_login)).length;
+
+  return (
+    <>
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <h3>User Activity Monitor</h3>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.9rem', cursor: 'pointer' }}>
+              <input type="checkbox" checked={autoRefresh} onChange={e => setAutoRefresh(e.target.checked)} />
+              Auto-refresh (30s)
+            </label>
+            <button className="btn btn-primary btn-sm" onClick={loadUsers}>🔄 Refresh Now</button>
+          </div>
+        </div>
+
+        {/* Quick Stats */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 20 }}>
+          <div style={{ background: '#e7f3ff', border: '1px solid #b3d9ff', borderRadius: 10, padding: 16 }}>
+            <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0055b3' }}>{onlineCount}</div>
+            <div style={{ fontSize: '0.88rem', color: '#0055b3', fontWeight: 600 }}>Users Online Now</div>
+          </div>
+          <div style={{ background: '#f0f0f0', border: '1px solid #ddd', borderRadius: 10, padding: 16 }}>
+            <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#666' }}>{users.length - onlineCount}</div>
+            <div style={{ fontSize: '0.88rem', color: '#666', fontWeight: 600 }}>Users Offline</div>
+          </div>
+          <div style={{ background: '#fff3cd', border: '1px solid #ffc107', borderRadius: 10, padding: 16 }}>
+            <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#856404' }}>{users.length}</div>
+            <div style={{ fontSize: '0.88rem', color: '#856404', fontWeight: 600 }}>Total Members</div>
+          </div>
+        </div>
+
+        {/* Filter Buttons */}
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+          <button 
+            className={`btn btn-sm ${filter === 'all' ? 'btn-primary' : ''}`} 
+            onClick={() => setFilter('all')}
+            style={filter !== 'all' ? { background: '#f0f0f0' } : {}}
+          >
+            All Users
+          </button>
+          <button 
+            className={`btn btn-sm ${filter === 'online' ? 'btn-primary' : ''}`} 
+            onClick={() => setFilter('online')}
+            style={filter !== 'online' ? { background: '#f0f0f0' } : {}}
+          >
+            🟢 Online ({onlineCount})
+          </button>
+          <button 
+            className={`btn btn-sm ${filter === 'offline' ? 'btn-primary' : ''}`} 
+            onClick={() => setFilter('offline')}
+            style={filter !== 'offline' ? { background: '#f0f0f0' } : {}}
+          >
+            ⚫ Offline ({users.length - onlineCount})
+          </button>
+        </div>
+      </div>
+
+      {/* Users Table */}
+      <div className="dash-table-wrap">
+        <h3 style={{ marginBottom: 16 }}>Activity Details</h3>
+        {loading ? <Spinner /> : (
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Last Login</th>
+                <th>Last Login Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: 'center', color: '#888' }}>
+                    No users found
+                  </td>
+                </tr>
+              )}
+              {filtered.map(u => {
+                const online = isOnline(u.last_login);
+                return (
+                  <tr key={u.id}>
+                    <td><strong>{u.full_name}</strong></td>
+                    <td>{u.email}</td>
+                    <td>
+                      <span style={{
+                        padding: '2px 10px',
+                        borderRadius: 6,
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        background: roleBadgeColor[u.role],
+                        color: roleTextColor[u.role]
+                      }}>
+                        {u.role?.replace(/_/g, ' ').toUpperCase()}
+                      </span>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <div style={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: '50%',
+                          background: online ? '#22c55e' : '#cbd5e1',
+                          boxShadow: online ? '0 0 8px rgba(34,197,94,0.5)' : 'none'
+                        }} />
+                        <span style={{ fontWeight: 600, color: online ? '#22c55e' : '#999' }}>
+                          {online ? 'Online' : 'Offline'}
+                        </span>
+                      </div>
+                    </td>
+                    <td>
+                      {u.last_login ? new Date(u.last_login).toLocaleDateString() : 'Never logged in'}
+                    </td>
+                    <td style={{ fontSize: '0.85rem', color: '#666' }}>
+                      {formatTime(u.last_login)}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </>
+  );
+};
+
 const Profile = () => {
   const { user, updateUser } = useAuth();
   const [form, setForm] = useState({ full_name: user?.full_name || '', phone: user?.phone || '', year_of_study: user?.year_of_study || '' });
@@ -606,9 +781,11 @@ const Profile = () => {
         </div>
       </div>
 
+      <ProfileExperience user={user} roleLabel="Administrator" accent="rose" />
+
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
         {/* Update Info */}
-        <div className="dash-form">
+        <div className="dash-form" id="profile-edit-section">
           <h3>Update Information</h3>
           <form onSubmit={updateProfile}>
             <div className="form-group"><label>Email (cannot change)</label><input value={user?.email} disabled style={{ background: '#f5f5f5' }} /></div>
@@ -646,7 +823,7 @@ const Profile = () => {
       </div>
 
       {/* Change Password */}
-      <div className="dash-form" style={{ maxWidth: '100%' }}>
+      <div className="dash-form" id="profile-security-section" style={{ maxWidth: '100%' }}>
         <h3>Change Password</h3>
         <form onSubmit={changePassword}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
@@ -680,6 +857,7 @@ const AdminDashboard = () => (
     <Routes>
       <Route path="/" element={<AdminOverview />} />
       <Route path="/users" element={<ManageUsers />} />
+      <Route path="/online-users" element={<OnlineUsers />} />
       <Route path="/events" element={<ManageEvents />} />
       <Route path="/announcements" element={<Announcements />} />
       <Route path="/suggestions" element={<Suggestions />} />
