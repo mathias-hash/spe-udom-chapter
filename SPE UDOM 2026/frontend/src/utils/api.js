@@ -15,9 +15,25 @@ const isDevelopmentFrontendHost = location => {
 
 const getRuntimeApiBaseUrl = () => {
   const configuredBase = process.env.REACT_APP_API_BASE_URL?.trim().replace(/\/$/, '');
-  if (configuredBase) return configuredBase;
   if (typeof window === 'undefined') return 'http://localhost:8000';
   const { hostname, protocol, host } = window.location;
+  if (configuredBase) {
+    try {
+      const configuredUrl = new URL(configuredBase);
+      const configuredHostIsLocal = isDevelopmentFrontendHost({
+        hostname: configuredUrl.hostname,
+        port: configuredUrl.port,
+      });
+      const currentHostIsLocal = isDevelopmentFrontendHost(window.location);
+
+      // Ignore localhost/private-network API URLs when the app is running on a public host.
+      if (!configuredHostIsLocal || currentHostIsLocal) {
+        return configuredBase;
+      }
+    } catch {
+      return configuredBase;
+    }
+  }
   if (isDevelopmentFrontendHost(window.location)) {
     return `${protocol}//${hostname}:8000`;
   }
