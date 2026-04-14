@@ -20,6 +20,7 @@ services:
         fromDatabase:
           name: spe-udom-db
           property: connectionString
+        sync: true
 
 databases:
   - name: spe-udom-db

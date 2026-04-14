@@ -1,5 +1,7 @@
 from pathlib import Path
+import os
 import environ
+import dj_database_url
 from cryptography.fernet import Fernet
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -141,9 +143,20 @@ ASGI_APPLICATION = 'backend.asgi.application'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-DATABASES = {
-    'default': env.db('DATABASE_URL', default=f'sqlite:///{BASE_DIR / "db.sqlite3"}')
-}
+# Database configuration - use PostgreSQL on Render, SQLite locally
+import dj_database_url
+if 'DATABASE_URL' in os.environ:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL'),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+else:
+    DATABASES = {
+        'default': env.db('DATABASE_URL', default=f'sqlite:///{BASE_DIR / "db.sqlite3"}')
+    }
 AUTH_USER_MODEL = 'core.Student'
 
 REST_FRAMEWORK = {
