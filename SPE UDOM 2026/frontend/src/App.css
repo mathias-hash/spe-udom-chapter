@@ -251,7 +251,10 @@ a { text-decoration: none; }
 }
 
 @media (min-width: 1024px) {
-  .main-content { margin-left: 240px; }
+  .main-content {
+    margin-left: 0;
+    padding-top: 160px;
+  }
   .leadership-grid { grid-template-columns: repeat(3, 1fr); }
 }
 

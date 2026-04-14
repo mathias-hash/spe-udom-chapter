@@ -1,10 +1,65 @@
-.auth-wrapper {
+.auth-page-wrapper {
+  display: flex;
   min-height: 100vh;
-  position: relative;
   background: #f5f7fb;
   padding-top: 100px;
+}
+
+/* Sidebar for auth pages */
+.auth-sidebar {
+  width: 200px;
+  background: #0066cc;
   display: flex;
   flex-direction: column;
+  position: fixed;
+  top: 100px;
+  left: 0;
+  height: calc(100vh - 100px);
+  z-index: 100;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+  padding: 20px 16px;
+  gap: 24px;
+  overflow-y: auto;
+}
+
+.auth-sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  padding-bottom: 16px;
+}
+
+.auth-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.auth-sidebar-link {
+  color: rgba(255,255,255,0.85);
+  text-decoration: none;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  border-radius: 8px;
+  transition: background 0.2s;
+  display: block;
+}
+
+.auth-sidebar-link:hover {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+}
+
+.auth-wrapper {
+  margin-left: 200px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: calc(100% - 200px);
+  padding-top: 0;
 }
 
 /* Top slideshow panel */
@@ -15,6 +70,7 @@
   height: 220px;
   overflow: hidden;
   flex-shrink: 0;
+  margin-top: 0;
 }
 
 .auth-slideshow-panel .auth-slideshow {
@@ -152,6 +208,20 @@
 
 .auth-wrapper .page-header {
   left: 0 !important;
+}
+
+@media (max-width: 768px) {
+  .auth-sidebar {
+    display: none;
+  }
+  .auth-wrapper {
+    margin-left: 0;
+    width: 100%;
+    padding-top: 100px;
+  }
+  .auth-page-wrapper {
+    padding-top: 0;
+  }
 }
 
 @media (max-width: 480px) {

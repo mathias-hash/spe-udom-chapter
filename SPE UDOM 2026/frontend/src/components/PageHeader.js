@@ -43,11 +43,35 @@ const LogoutIcon = () => (
 );
 
 const normalizeErrors = data => {
-  if (!data || typeof data !== 'object') return { non_field_errors: ['Unable to process the server response.'] };
-  if (typeof data.detail === 'string') return { non_field_errors: [data.detail] };
-  if (typeof data.error === 'string') return { non_field_errors: [data.error] };
-  if (typeof data.non_field_errors === 'string') return { non_field_errors: [data.non_field_errors] };
-  return data;
+    if (!data || typeof data !== 'object') {
+      return { non_field_errors: ['Unable to process the server response.'] };
+    }
+    
+    // Handle error from exception handler
+    if (data.error && typeof data.error === 'string') {
+      return { non_field_errors: [data.error] };
+    }
+    
+    // Handle detail field
+    if (data.detail && typeof data.detail === 'string') {
+      return { non_field_errors: [data.detail] };
+    }
+    
+    // Handle validation errors as string
+    if (data.non_field_errors && typeof data.non_field_errors === 'string') {
+      return { non_field_errors: [data.non_field_errors] };
+    }
+    
+    // Handle nested array errors
+    if (data.non_field_errors && Array.isArray(data.non_field_errors)) {
+      return {
+        non_field_errors: data.non_field_errors.map(e => 
+          typeof e === 'object' && e.message ? e.message : String(e)
+        ),
+      };
+    }
+    
+    // Return as-is (already properly formatted)
 };
 
 const PageHeader = () => {
@@ -95,10 +119,26 @@ const PageHeader = () => {
         closeModal();
         navigate('/dashboard');
       } else {
-        setLoginErrors(normalizeErrors(res.data));
+        // Better error diagnosis
+        const errorData = normalizeErrors(res.data);
+        if (!errorData.non_field_errors || errorData.non_field_errors.length === 0) {
+          // Check if it's a server connectivity issue
+          if (res.status === 0) {
+            setLoginErrors({ non_field_errors: ['Cannot reach the backend server. Make sure it\'s running on http://localhost:8000'] });
+          } else if (res.status >= 500) {
+            setLoginErrors({ non_field_errors: ['Server error. Please try again later.'] });
+          } else if (res.status === 400 && !res.data.email && !res.data.password) {
+            setLoginErrors({ non_field_errors: ['Invalid credentials. Please check your email and password.'] });
+          } else {
+            setLoginErrors(errorData);
+          }
+        } else {
+          setLoginErrors(errorData);
+        }
       }
-    } catch {
-      setLoginErrors({ non_field_errors: ['Cannot reach the server.'] });
+    } catch (err) {
+      console.error('Login error:', err);
+      setLoginErrors({ non_field_errors: ['An unexpected error occurred. Please try again.'] });
     }
     setLoginLoading(false);
   };

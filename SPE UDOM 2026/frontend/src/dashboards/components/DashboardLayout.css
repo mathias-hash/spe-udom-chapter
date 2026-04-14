@@ -110,14 +110,56 @@
 }
 
 .dash-toggle {
-  background: #0066cc;
-  color: #fff;
+  background: none;
+  color: #0066cc;
   border: none;
-  border-radius: 6px;
-  width: 36px; height: 36px;
-  font-size: 1rem;
+  width: 40px; 
+  height: 40px;
   cursor: pointer;
   flex-shrink: 0;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  position: relative;
+}
+
+@media (max-width: 767px) {
+  .dash-toggle {
+    display: flex;
+  }
+}
+
+.dash-toggle span {
+  width: 24px;
+  height: 2.5px;
+  background: #0066cc;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.dash-toggle:hover span {
+  background: #003d99;
+}
+
+.dash-toggle.open span:nth-child(1) {
+  transform: rotate(45deg) translate(8px, 8px);
+}
+
+.dash-toggle.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.dash-toggle.open span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -7px);
+}
+
+.dash-toggle:hover {
+  background: rgba(0, 102, 204, 0.08);
+  border-radius: 8px;
 }
 
 .dash-content {

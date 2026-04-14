@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Toast from '../components/Toast';
 import { API_BASE } from '../utils/api';
+import logo from '../assets/spe-udom-logo.png';
 import './Auth.css';
 
 const ResetPassword = () => {
@@ -38,29 +39,46 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="auth-wrapper">
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-      <div className="auth-card">
-        <div className="auth-header">
-          <h2>SPE UDOM CHAPTER</h2>
-          <p>Set your new password</p>
+    <div className="auth-page-wrapper">
+      {/* Sidebar */}
+      <aside className="auth-sidebar">
+        <div className="auth-sidebar-header">
+          <img src={logo} alt="SPE" style={{ height: '32px', width: 'auto' }} />
+          <span style={{ color: '#fff', fontWeight: 700, fontSize: '0.9rem', marginLeft: '8px' }}>SPE UDOM</span>
         </div>
-        <form onSubmit={handleSubmit} className="auth-form">
-          <div className="form-group">
-            <label>New Password</label>
-            <input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })}
-              placeholder="Min 6 characters" required />
+        <nav className="auth-sidebar-nav">
+          <Link to="/" className="auth-sidebar-link">🏠 Home</Link>
+          <Link to="/events" className="auth-sidebar-link">📅 Events</Link>
+          <Link to="/publications" className="auth-sidebar-link">📚 Publications</Link>
+          <Link to="/leadership" className="auth-sidebar-link">👥 Leadership</Link>
+        </nav>
+      </aside>
+
+      {/* Main Auth Content */}
+      <div className="auth-wrapper">
+        {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+        <div className="auth-card" style={{ marginTop: '40px', marginBottom: 'auto' }}>
+          <div className="auth-header">
+            <h2>Set New Password</h2>
+            <p>Enter your new password</p>
           </div>
-          <div className="form-group">
-            <label>Confirm Password</label>
-            <input type="password" value={form.confirm_password} onChange={e => setForm({ ...form, confirm_password: e.target.value })}
-              placeholder="Repeat password" required />
-          </div>
-          <button type="submit" className="auth-btn" disabled={loading}>
-            {loading ? 'Resetting...' : 'Reset Password'}
-          </button>
-        </form>
-        <p className="auth-switch"><Link to="/login">← Back to Login</Link></p>
+          <form onSubmit={handleSubmit} className="auth-form">
+            <div className="form-group">
+              <label>New Password</label>
+              <input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })}
+                placeholder="Min 6 characters" required />
+            </div>
+            <div className="form-group">
+              <label>Confirm Password</label>
+              <input type="password" value={form.confirm_password} onChange={e => setForm({ ...form, confirm_password: e.target.value })}
+                placeholder="Repeat password" required />
+            </div>
+            <button type="submit" className="auth-btn" disabled={loading}>
+              {loading ? 'Resetting...' : 'Reset Password'}
+            </button>
+          </form>
+          <p className="auth-switch"><Link to="/login">← Back to Login</Link></p>
+        </div>
       </div>
     </div>
   );

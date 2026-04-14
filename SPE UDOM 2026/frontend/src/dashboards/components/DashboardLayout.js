@@ -97,8 +97,14 @@ const DashboardLayout = ({ children }) => {
 
       <div className={`dash-main ${sidebarOpen ? '' : 'expanded'}`}>
         <header className="dash-topbar">
-          <button className="dash-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
-            {sidebarOpen ? 'X' : '='}
+          <button 
+            className={`dash-toggle ${sidebarOpen ? 'open' : ''}`}
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            title={sidebarOpen ? 'Close menu' : 'Open menu'}
+          >
+            <span></span>
+            <span></span>
+            <span></span>
           </button>
         </header>
         <main className="dash-content">{children}</main>

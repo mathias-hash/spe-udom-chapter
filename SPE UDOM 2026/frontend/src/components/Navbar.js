@@ -23,6 +23,19 @@ const Navbar = () => {
   return (
     <>
       <TopBanner />
+      <nav className="desktop-nav" aria-label="Desktop menu">
+        <div className="desktop-nav-inner">
+          {navItems.map(({ path, label }) => (
+            <Link
+              key={path}
+              to={path}
+              className={`desktop-nav-link ${location.pathname === path ? 'active' : ''}`}
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+      </nav>
       <button className="sidebar-hamburger" onClick={() => setOpen(o => !o)} aria-label="Toggle menu">
         <span /><span /><span />
       </button>

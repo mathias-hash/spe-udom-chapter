@@ -28,12 +28,12 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="auth-wrapper">
+    <div className="auth-wrapper" style={{ paddingTop: '100px' }}>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-      <div className="auth-card">
+      <div className="auth-card" style={{ marginTop: '40px', marginBottom: 'auto' }}>
         <div className="auth-header">
-          <h2>SPE UDOM CHAPTER</h2>
-          <p>Reset your password</p>
+          <h2>Reset Password</h2>
+          <p>Enter your email to receive a reset link</p>
         </div>
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
