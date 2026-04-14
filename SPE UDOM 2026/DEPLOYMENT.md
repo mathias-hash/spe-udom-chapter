@@ -2,7 +2,7 @@
 
 ## Backend: Railway or Render
 
-Deploy the `backend` folder.
+Deploy the `SPE UDOM 2026/backend` folder.
 
 ### Environment variables
 
@@ -15,15 +15,15 @@ Deploy the `backend` folder.
 
 ### Render
 
-- Root directory: `backend`
+- Root directory: `SPE UDOM 2026/backend`
 - Build command: `./build.sh`
 - Start command: `python manage.py migrate && gunicorn backend.wsgi:application`
-- Add `backend/runtime.txt` with `python-3.13.3` so Render does not default to Python 3.14
-- Optional: use the included `backend/render.yaml`
+- Add `SPE UDOM 2026/backend/runtime.txt` with `python-3.13.3` so Render does not default to Python 3.14
+- Optional: use the included `SPE UDOM 2026/backend/render.yaml`
 
 ### Railway
 
-- Root directory: `backend`
+- Root directory: `SPE UDOM 2026/backend`
 - Build command: `pip install -r requirements.txt`
 - Start command: `gunicorn backend.wsgi:application`
 - Run once after first deploy: `python manage.py migrate`

@@ -2,7 +2,7 @@ services:
   - type: web
     name: spe-udom-backend
     env: python
-    rootDir: backend
+    rootDir: SPE UDOM 2026/backend
     buildCommand: ./build.sh
     startCommand: python manage.py migrate && gunicorn backend.wsgi:application
     envVars:
