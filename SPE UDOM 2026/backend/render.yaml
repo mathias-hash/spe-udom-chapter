@@ -4,8 +4,10 @@ services:
     env: python
     rootDir: backend
     buildCommand: ./build.sh
-    startCommand: gunicorn backend.wsgi:application
+    startCommand: python manage.py migrate && gunicorn backend.wsgi:application
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.3
       - key: SECRET_KEY
         generateValue: true
       - key: DEBUG

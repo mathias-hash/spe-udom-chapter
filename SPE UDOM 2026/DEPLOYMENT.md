@@ -17,7 +17,8 @@ Deploy the `backend` folder.
 
 - Root directory: `backend`
 - Build command: `./build.sh`
-- Start command: `gunicorn backend.wsgi:application`
+- Start command: `python manage.py migrate && gunicorn backend.wsgi:application`
+- Python version: `3.13.3` if Render defaults to Python 3.14 and older wheels fail to install
 - Optional: use the included `backend/render.yaml`
 
 ### Railway
