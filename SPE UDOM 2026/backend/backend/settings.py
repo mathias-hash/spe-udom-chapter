@@ -316,13 +316,26 @@ LOGGING = {
 
 # ─── EMAIL CONFIGURATION ────────────────────────────────────────
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = env('EMAIL_HOST', default='smtp.gmail.com')
 EMAIL_PORT = env.int('EMAIL_PORT', default=587)
 EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
+EMAIL_TIMEOUT = env.int('EMAIL_TIMEOUT', default=10)
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='SPE UDOM Chapter <noreply@speudom.ac.tz>')
+
+placeholder_email_values = {
+    '',
+    'your-email@gmail.com',
+    'your_app_password',
+    'your-app-password',
+}
+email_backend_default = (
+    'django.core.mail.backends.smtp.EmailBackend'
+    if EMAIL_HOST_USER not in placeholder_email_values and EMAIL_HOST_PASSWORD not in placeholder_email_values
+    else 'django.core.mail.backends.dummy.EmailBackend'
+)
+EMAIL_BACKEND = env('EMAIL_BACKEND', default=email_backend_default)
 
 PASSWORD_RESET_TIMEOUT = 600
 PASSWORD_RESET_CONFIRM_URL = env('PASSWORD_RESET_CONFIRM_URL', default='http://localhost:3000/reset-password')
