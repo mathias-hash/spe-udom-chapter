@@ -10,6 +10,7 @@ import './Auth.css';
 
 const normalizeErrors = data => {
   if (!data || typeof data !== 'object') return { non_field_errors: ['Unable to process the server response.'] };
+  if (data.details && typeof data.details === 'object') return normalizeErrors(data.details);
   if (typeof data.detail === 'string') return { non_field_errors: [data.detail] };
   if (typeof data.error === 'string') return { non_field_errors: [data.error] };
   if (typeof data.non_field_errors === 'string') return { non_field_errors: [data.non_field_errors] };

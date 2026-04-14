@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import LiveChat from './components/LiveChat';
 import Navbar from './components/Navbar';
@@ -54,19 +54,35 @@ const PublicLayout = () => (
   </>
 );
 
+const AppShell = () => {
+  const location = useLocation();
+  const hideLiveChat = (
+    location.pathname === '/login' ||
+    location.pathname === '/register' ||
+    location.pathname === '/forgot-password' ||
+    location.pathname.startsWith('/reset-password/')
+  );
+
+  return (
+    <>
+      {!hideLiveChat && <LiveChat />}
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:uidb64/:token" element={<ResetPassword />} />
+        <Route path="/dashboard/*" element={<DashboardRouter />} />
+        <Route path="/*" element={<PublicLayout />} />
+      </Routes>
+    </>
+  );
+};
+
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <LiveChat />
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password/:uidb64/:token" element={<ResetPassword />} />
-          <Route path="/dashboard/*" element={<DashboardRouter />} />
-          <Route path="/*" element={<PublicLayout />} />
-        </Routes>
+        <AppShell />
       </Router>
     </AuthProvider>
   );

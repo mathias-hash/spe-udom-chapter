@@ -58,16 +58,28 @@ def env_list(name, default):
     return value
 
 
-ALLOWED_HOSTS = env_list('ALLOWED_HOSTS', 'localhost,127.0.0.1')
-TRUSTED_ORIGINS = env_list(
-    'TRUSTED_ORIGINS',
-    'http://localhost:3000,'
-    'http://127.0.0.1:3000,'
-    'http://0.0.0.0:3000,'
-    'http://localhost:3001,'
-    'http://127.0.0.1:3001,'
-    'http://0.0.0.0:3001'
-)
+RENDER_EXTERNAL_HOSTNAME = env('RENDER_EXTERNAL_HOSTNAME', default='').strip()
+
+default_allowed_hosts = ['localhost', '127.0.0.1']
+if RENDER_EXTERNAL_HOSTNAME:
+    default_allowed_hosts.append(RENDER_EXTERNAL_HOSTNAME)
+
+default_trusted_origins = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://0.0.0.0:3000',
+    'http://localhost:3001',
+    'http://127.0.0.1:3001',
+    'http://0.0.0.0:3001',
+]
+if RENDER_EXTERNAL_HOSTNAME:
+    default_trusted_origins.extend([
+        f'https://{RENDER_EXTERNAL_HOSTNAME}',
+        f'http://{RENDER_EXTERNAL_HOSTNAME}',
+    ])
+
+ALLOWED_HOSTS = env_list('ALLOWED_HOSTS', ','.join(default_allowed_hosts))
+TRUSTED_ORIGINS = env_list('TRUSTED_ORIGINS', ','.join(default_trusted_origins))
 CORS_ALLOWED_ORIGINS = env_list('CORS_ALLOWED_ORIGINS', ','.join(TRUSTED_ORIGINS))
 CSRF_TRUSTED_ORIGINS = env_list('CSRF_TRUSTED_ORIGINS', ','.join(TRUSTED_ORIGINS))
 

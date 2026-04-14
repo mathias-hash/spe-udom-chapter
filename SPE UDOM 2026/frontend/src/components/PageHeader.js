@@ -47,6 +47,10 @@ const normalizeErrors = data => {
     return { non_field_errors: ['Unable to process the server response.'] };
   }
 
+  if (data.details && typeof data.details === 'object') {
+    return normalizeErrors(data.details);
+  }
+
   if (data.error && typeof data.error === 'string') {
     return { non_field_errors: [data.error] };
   }
