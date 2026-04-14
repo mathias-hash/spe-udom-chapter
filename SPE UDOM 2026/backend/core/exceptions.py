@@ -52,9 +52,8 @@ def custom_exception_handler(exc, context):
         response.data = {'error': 'Authentication credentials were not provided'}
     
     elif response.status_code == status.HTTP_400_BAD_REQUEST:
-        # Keep validation errors but clean them up
-        if isinstance(response.data, dict):
-            response.data = {'error': 'Invalid request data', 'details': response.data}
+        # Pass validation errors through directly so frontend can display them
+        pass
     
     elif response.status_code == status.HTTP_404_NOT_FOUND:
         response.data = {'error': 'Resource not found'}
