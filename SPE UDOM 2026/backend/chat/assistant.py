@@ -388,26 +388,21 @@ def _thanks_response() -> str:
 def get_assistant_response(message: str, sender_name: str = 'there') -> str:
     """
     Intelligently route user messages to appropriate response handlers.
-    Checks custom FAQs first (highest priority), then built-in handlers.
+    Checks core handlers first (greetings, membership, thanks), then custom FAQs, then other topics.
     """
     n = (message or '').strip().lower()
     if not n:
         return FALLBACK_RESPONSE
 
-    # Custom FAQ from DB (highest priority) — with improved matching
-    custom = _find_custom_faq(n)
-    if custom:
-        return custom
-
-    # Greeting (must check before other keywords that contain greeting words)
+    # Greeting (must check early before other keywords that contain greeting words)
     if _match_score(n, ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening', 'howdy', 'greetings', 'whats up', "what's up"]) >= 1:
         return _greeting_response(sender_name)
 
-    # Thanks
+    # Thanks (check early)
     if _contains_any(n, ['thank you', 'thanks', 'asante', 'thank u', 'thx', 'much appreciated']):
         return _thanks_response()
 
-    # Membership (check before general 'help' questions)
+    # Membership (CORE intent - check BEFORE custom FAQs to prevent bad FAQ entries from breaking this)
     membership_keywords = ['join', 'membership', 'member', 'register', 'sign up', 'how to join', 'requirement', 'become member', 'apply']
     if _contains_any(n, membership_keywords):
         if _contains_any(n, ['benefit', 'advantage', 'gain', 'get', 'what do i get', 'what will i']):
@@ -416,6 +411,11 @@ def get_assistant_response(message: str, sender_name: str = 'there') -> str:
 
     if _contains_any(n, ['benefit', 'advantage', 'what do i get', 'what will i']) and 'member' in n:
         return _membership_benefits_response()
+
+    # Custom FAQ from DB (checked after core handlers to prevent bad FAQs from breaking key functionality)
+    custom = _find_custom_faq(n)
+    if custom:
+        return custom
 
     # SPE International
     spe_keywords = ['what is spe', 'what does spe do', 'spe international', 'society of petroleum', 'about spe', 'spe purpose']
