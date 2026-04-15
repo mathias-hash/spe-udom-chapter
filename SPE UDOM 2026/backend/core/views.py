@@ -325,6 +325,18 @@ def manage_user(request, pk):
 @api_view(['POST'])
 @permission_classes([IsAdmin])
 def create_user(request):
+    """Create a new user with proper password validation and error handling"""
+    # Validate required fields
+    required = ['email', 'full_name', 'password', 'confirm_password']
+    for field in required:
+        if not request.data.get(field):
+            return Response({field: [f'{field.replace("_", " ").title()} is required']}, status=400)
+    
+    # Validate passwords match
+    if request.data.get('password') != request.data.get('confirm_password'):
+        return Response({'confirm_password': ['Passwords do not match']}, status=400)
+    
+    # Use RegisterSerializer for validation (includes password strength check)
     s = RegisterSerializer(data=request.data)
     if s.is_valid():
         user = s.save()
@@ -332,7 +344,10 @@ def create_user(request):
         if role in dict(Student.ROLE_CHOICES):
             user.role = role
             user.save()
+            log_security_event('USER_CREATED', user=user, details=f'Created by admin: {request.user.email}, Role: {role}')
         return Response(StudentSerializer(user).data, status=201)
+    
+    # Return detailed validation errors to help admin understand what went wrong
     return Response(s.errors, status=400)
 
 

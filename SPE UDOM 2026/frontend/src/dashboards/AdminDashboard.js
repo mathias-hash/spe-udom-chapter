@@ -182,9 +182,21 @@ const ManageUsers = () => {
               </div>
               {!editUser && (
                 <>
+                  <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                    <label>Password Requirements *</label>
+                    <div style={{ background: '#f8f9fa', border: '1px solid #e9ecef', borderRadius: 6, padding: 12, marginBottom: 8, fontSize: '0.9rem', color: '#495057' }}>
+                      <ul style={{ margin: '0 0 0 18px', padding: 0 }}>
+                        <li>Minimum 6 characters</li>
+                        <li>Cannot be all numbers (e.g., "123456")</li>
+                        <li>Cannot be common words (e.g., "password", "admin", "12345678")</li>
+                        <li>Should not contain user's name or email</li>
+                      </ul>
+                      <p style={{ margin: '8px 0 0 0', fontStyle: 'italic', color: '#6c757d' }}>💡 Example: SPEUdom@2026, Manager123!, Ch@pter2026</p>
+                    </div>
+                  </div>
                   <div className="form-group">
                     <label>Password *</label>
-                    <input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="Min 6 characters" required />
+                    <input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="Enter secure password" required />
                     {formErrors.password && <span style={{ color: '#dc3545', fontSize: '0.82rem' }}>{formErrors.password}</span>}
                   </div>
                   <div className="form-group">
