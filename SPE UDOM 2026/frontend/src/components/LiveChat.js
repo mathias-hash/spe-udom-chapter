@@ -4,7 +4,7 @@ import { API_BASE_URL } from '../utils/api';
 import './LiveChat.css';
 
 const API = API_BASE_URL.replace(/\/$/, '');
-const POLL_MS = 4000;
+const POLL_MS = 100000;
 
 const LiveChat = () => {
   const { user } = useAuth();
@@ -36,8 +36,17 @@ const LiveChat = () => {
   const senderName = user ? user.full_name : 'Guest';
   const senderRole = user ? (user.role === 'admin' ? 'admin' : 'member') : 'guest';
 
+  const stopPolling = useCallback(() => {
+    clearInterval(pollTimer.current);
+    clearTimeout(retryTimer.current);
+    pollTimer.current = null;
+    retryTimer.current = null;
+  }, []);
+
   // ── fetch room & messages ────────────────────────────────────
   const fetchRoom = useCallback(async () => {
+    if (!mountedRef.current || !openRef.current) return;
+
     try {
       const res = await fetch(`${API}/api/chat/support-room/`, {
         headers: { ...authHeader() },
@@ -62,6 +71,7 @@ const LiveChat = () => {
       // start polling
       clearInterval(pollTimer.current);
       pollTimer.current = setInterval(async () => {
+        if (!mountedRef.current || !openRef.current) return;
         try {
           const r = await fetch(`${API}/api/chat/support-room/`, {
             headers: { ...authHeader() },
@@ -92,17 +102,26 @@ const LiveChat = () => {
       // Back off: 5s, 8s, 12s, 18s, then 30s
       const delay = Math.min(5000 * Math.pow(1.5, retryCountRef.current - 1), 30000);
       clearTimeout(retryTimer.current);
-      retryTimer.current = setTimeout(fetchRoom, delay);
+      retryTimer.current = setTimeout(() => {
+        if (openRef.current) fetchRoom();
+      }, delay);
     }
-  }, [user, senderName, authHeader]); // eslint-disable-line
+  }, [senderName, authHeader]); // eslint-disable-line
 
   useEffect(() => {
-    fetchRoom();
+    openRef.current = open;
+
+    if (open) {
+      setStatus('connecting');
+      fetchRoom();
+    } else {
+      stopPolling();
+    }
+
     return () => {
-      clearInterval(pollTimer.current);
-      clearTimeout(retryTimer.current);
+      stopPolling();
     };
-  }, [fetchRoom]);
+  }, [open, fetchRoom, stopPolling]);
 
   useEffect(() => { openRef.current = open; if (open) setUnread(0); }, [open]);
 
