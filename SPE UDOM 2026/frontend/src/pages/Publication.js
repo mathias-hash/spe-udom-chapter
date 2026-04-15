@@ -16,9 +16,7 @@ const Publication = () => {
   useEffect(() => {
     setLoading(true);
     const params = new URLSearchParams({ search: query, page, page_size: ITEMS_PER_PAGE });
-    fetch(`${API_BASE}/publications/?${params}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('spe_access')}` }
-    })
+    fetch(`${API_BASE}/publications/?${params}`)
       .then(r => r.json())
       .then(d => {
         if (Array.isArray(d)) { setPubs(d); setTotalPages(1); }

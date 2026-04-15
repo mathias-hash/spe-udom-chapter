@@ -217,6 +217,12 @@ const PageHeader = () => {
         </div>
       </div>
 
+      {/* Mobile-only header with Student Chapter and tagline */}
+      <div className="page-header-mobile-section">
+        <span className="mobile-section-text">Student Chapter</span>
+        <span className="mobile-tagline">Solutions. People. Energy.</span>
+      </div>
+
       {/* Modal backdrop */}
       {modal && (
         <div className="ph-modal-backdrop" onClick={closeModal}>

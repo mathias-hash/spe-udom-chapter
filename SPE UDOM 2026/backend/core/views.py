@@ -520,7 +520,6 @@ def announcements(request):
 
 # ── Publications ──────────────────────────────────────────────
 @api_view(['GET', 'POST'])
-@permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser, FormParser, JSONParser])
 def publications(request):
     if request.method == 'GET':
@@ -529,6 +528,8 @@ def publications(request):
         if search:
             qs = qs.filter(title__icontains=search) | qs.filter(content__icontains=search)
         return Response(paginate(qs.order_by('-created_at'), request, PublicationSerializer))
+    if not request.user.is_authenticated:
+        return Response({'error': 'Authentication credentials were not provided'}, status=401)
     if request.user.role not in ['admin', 'general_secretary']:
         return Response({'error': 'Permission denied'}, status=403)
     upload = request.FILES.get('file')

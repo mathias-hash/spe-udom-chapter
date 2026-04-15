@@ -96,14 +96,44 @@
     font-size: 0.58rem;
   }
 
-  .page-header-tagline {
-    position: static;
-    transform: none;
-    font-size: 0.75rem;
-    font-weight: 700;
-    margin-left: auto;
-    margin-right: 8px;
-    white-space: nowrap;
+  .page-header-tagline { display: none; }
+}
+
+/* Mobile-only section with Student Chapter and tagline */
+.page-header-mobile-section {
+  display: none;
+  position: fixed;
+  top: 108px;
+  left: 0;
+  right: 0;
+  padding: 10px 20px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e0eaf8;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 899;
+}
+
+.mobile-section-text {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #666;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.mobile-tagline {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0055b3;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 600px) {
+  .page-header-mobile-section {
+    display: flex;
+    top: 104px;
   }
 }
 
@@ -112,6 +142,10 @@
     padding-left: 54px;
     padding-right: 10px;
     height: 66px;
+  }
+
+  .page-header-mobile-section {
+    top: 102px;
   }
 
   .page-header-logo {
