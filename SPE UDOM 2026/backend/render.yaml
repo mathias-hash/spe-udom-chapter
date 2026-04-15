@@ -4,7 +4,7 @@ services:
     env: python
     rootDir: SPE UDOM 2026/backend
     buildCommand: ./build.sh
-    startCommand: python manage.py migrate && python create_superuser.py && gunicorn backend.wsgi:application
+    startCommand: bash -c 'python manage.py migrate && python create_superuser.py && echo "✓ Deployment successful. Starting Gunicorn server..." && gunicorn backend.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120 --access-logfile - --error-logfile - --log-level info'
     envVars:
       - key: PYTHON_VERSION
         value: 3.13.3

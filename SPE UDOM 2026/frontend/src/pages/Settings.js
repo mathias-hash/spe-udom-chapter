@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import Toast from '../components/Toast';
 import { api } from '../utils/api';
 import './Settings.css';
 
@@ -12,13 +13,12 @@ const Settings = () => {
   });
   const [passwordErrors, setPasswordErrors] = useState({});
   const [passwordLoading, setPasswordLoading] = useState(false);
-  const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [toast, setToast] = useState(null);
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     setPasswordLoading(true);
     setPasswordErrors({});
-    setPasswordSuccess(false);
 
     if (passwordForm.new_password !== passwordForm.confirm_password) {
       setPasswordErrors({ confirm_password: ['Passwords do not match'] });
@@ -42,9 +42,8 @@ const Settings = () => {
       });
 
       if (res.ok) {
-        setPasswordSuccess(true);
+        setToast({ message: 'Password changed successfully! 🔐', type: 'success' });
         setPasswordForm({ current_password: '', new_password: '', confirm_password: '' });
-        setTimeout(() => setPasswordSuccess(false), 5000);
       } else {
         const data = res.data || {};
         if (data.current_password) {
@@ -63,6 +62,7 @@ const Settings = () => {
 
   return (
     <div className="settings-container">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <div className="settings-card">
         <h2>Account Settings</h2>
         
@@ -130,10 +130,6 @@ const Settings = () => {
 
             {passwordErrors.non_field_errors && (
               <div className="error-banner">{passwordErrors.non_field_errors}</div>
-            )}
-
-            {passwordSuccess && (
-              <div className="success-banner">Password changed successfully!</div>
             )}
 
             <button type="submit" disabled={passwordLoading} className="submit-btn">

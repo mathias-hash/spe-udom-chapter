@@ -16,13 +16,35 @@ CONTACT_RESPONSE = (
 
 FALLBACK_RESPONSE = (
     'I can help with questions about SPE UDOM and SPE International — topics like membership, '
-    'leadership, events, elections, publications, scholarships, technical areas, and contact details. '
-    'Try asking: "How do I join?", "What is PetroBowl?", "Who is the president?", or "What events are coming?"'
+    'leadership, events, elections, publications, scholarships, technical areas, training, and contact details.\n\n'
+    '**Try asking me:**\n'
+    '• "How do I join?" or "What are membership benefits?"\n'
+    '• "What is PetroBowl?" or "Tell me about global events"\n'
+    '• "Who is the president?" or "What is the leadership?"\n'
+    '• "What events are coming?" or "When is the next workshop?"\n'
+    '• "What scholarships are available?" or "Career opportunities?"\n'
+    '• "How can I contact SPE UDOM?" or "What is your address?"\n'
+    '• "What is SPE International?" or "What do you do?"\n\n'
+    'If I cannot answer your question, please email us at speudom@gmail.com or use the contact form.'
 )
 
 
 def _contains_any(message: str, keywords: list[str]) -> bool:
-    return any(keyword in message for keyword in keywords)
+    """Check if any keyword appears in message (case-insensitive)"""
+    return any(keyword.lower() in message for keyword in keywords)
+
+
+def _match_score(message: str, keywords: list[str]) -> int:
+    """
+    Calculate match score for keywords in message.
+    Returns count of matching keywords.
+    Higher score = better match
+    """
+    count = 0
+    for keyword in keywords:
+        if keyword.lower() in message:
+            count += 1
+    return count
 
 
 def _format_list(items: list[str]) -> str:
@@ -34,12 +56,40 @@ def _format_list(items: list[str]) -> str:
 
 
 def _find_custom_faq(message: str) -> str | None:
+    """Find FAQ using intelligent keyword matching with fuzzy matching support"""
     faqs = ChatFAQ.objects.filter(is_active=True).order_by('-priority', 'title')
+    
+    best_match = None
+    best_score = 0
+    
     for faq in faqs:
         keywords = [k.strip().lower() for k in faq.keywords.split(',') if k.strip()]
-        if any(k in message for k in keywords):
-            return faq.response
-    return None
+        
+        # Exact or substring match (highest priority)
+        for keyword in keywords:
+            if keyword in message:
+                # Return immediately if exact match found
+                if best_score < 3:
+                    best_match = faq.response
+                    best_score = 3
+        
+        # Partial word match  (medium priority)
+        if best_score < 2:
+            for keyword in keywords:
+                words = keyword.split()
+                if all(w in message for w in words):
+                    best_match = faq.response
+                    best_score = 2
+        
+        # At least one keyword word matches (low priority)
+        if best_score < 1:
+            for keyword in keywords:
+                words = keyword.split()
+                if any(w in message for w in words):
+                    best_match = faq.response
+                    best_score = 1
+    
+    return best_match
 
 
 # ── Greeting ──────────────────────────────────────────────────
@@ -336,97 +386,115 @@ def _thanks_response() -> str:
 
 # ── Main dispatcher ───────────────────────────────────────────
 def get_assistant_response(message: str, sender_name: str = 'there') -> str:
+    """
+    Intelligently route user messages to appropriate response handlers.
+    Checks custom FAQs first (highest priority), then built-in handlers.
+    """
     n = (message or '').strip().lower()
     if not n:
         return FALLBACK_RESPONSE
 
-    # Custom FAQ from DB (highest priority)
+    # Custom FAQ from DB (highest priority) — with improved matching
     custom = _find_custom_faq(n)
     if custom:
         return custom
 
-    # Membership (check before greeting to avoid 'hi' in 'membership' false match)
-    if _contains_any(n, ['join', 'membership', 'member', 'register', 'sign up', 'how to join', 'requirement']):
-        if _contains_any(n, ['benefit', 'advantage', 'gain', 'get']):
-            return _membership_benefits_response()
-        return _join_response()
-
-    if _contains_any(n, ['benefit', 'advantage', 'what do i get']):
-        return _membership_benefits_response()
-
-    # Greeting
-    if _contains_any(n, ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening', 'howdy', 'greetings']):
+    # Greeting (must check before other keywords that contain greeting words)
+    if _match_score(n, ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening', 'howdy', 'greetings', 'whats up', "what's up"]) >= 1:
         return _greeting_response(sender_name)
 
     # Thanks
-    if _contains_any(n, ['thank you', 'thanks', 'asante', 'thank u', 'thx']):
+    if _contains_any(n, ['thank you', 'thanks', 'asante', 'thank u', 'thx', 'much appreciated']):
         return _thanks_response()
 
+    # Membership (check before general 'help' questions)
+    membership_keywords = ['join', 'membership', 'member', 'register', 'sign up', 'how to join', 'requirement', 'become member', 'apply']
+    if _contains_any(n, membership_keywords):
+        if _contains_any(n, ['benefit', 'advantage', 'gain', 'get', 'what do i get', 'what will i']):
+            return _membership_benefits_response()
+        return _join_response()
+
+    if _contains_any(n, ['benefit', 'advantage', 'what do i get', 'what will i']) and 'member' in n:
+        return _membership_benefits_response()
+
     # SPE International
-    if _contains_any(n, ['what is spe', 'what does spe do', 'spe international', 'society of petroleum']):
+    spe_keywords = ['what is spe', 'what does spe do', 'spe international', 'society of petroleum', 'about spe', 'spe purpose']
+    if _contains_any(n, spe_keywords):
         return _spe_international_response()
 
-    if _contains_any(n, ['spe value', 'core value', 'spe principle']):
+    if _contains_any(n, ['spe value', 'core value', 'spe principle', 'spe mission', 'values']):
         return _spe_values_response()
 
-    if _contains_any(n, ['technical area', 'drilling', 'reservoir', 'production engineering', 'petroleum geology', 'data science', 'energy transition']):
+    technical_keywords = ['technical area', 'drilling', 'reservoir', 'production engineering', 'petroleum geology', 'data science', 'energy transition', 'technical expertise']
+    if _contains_any(n, technical_keywords):
         return _spe_technical_areas_response()
 
-    if _contains_any(n, ['spe journal', 'spe publication', 'journal of petroleum', 'jpt', 'spe paper']):
+    if _contains_any(n, ['spe journal', 'spe publication', 'journal of petroleum', 'jpt', 'spe paper', 'research paper', 'technical paper']):
         return _spe_publications_response()
 
-    if _contains_any(n, ['spe training', 'spe course', 'spe certification', 'spe webinar', 'spe learning', 'e-learning']):
+    training_keywords = ['spe training', 'spe course', 'spe certification', 'spe webinar', 'spe learning', 'e-learning', 'learn', 'education', 'training program']
+    if _contains_any(n, training_keywords):
         return _spe_training_response()
 
     # Global events
     if _contains_any(n, ['petrobowl', 'petro bowl']):
         return _petrobowl_response()
 
-    if _contains_any(n, ['atce', 'annual technical conference', 'otc', 'offshore technology']):
+    if _contains_any(n, ['atce', 'annual technical conference', 'otc', 'offshore technology', 'conference']):
         return _atce_response()
 
-    if _contains_any(n, ['global event', 'spe event', 'international event', 'africa conference', 'student paper contest']):
+    if _contains_any(n, ['global event', 'spe event', 'international event', 'africa conference', 'student paper contest', 'competition']):
         return _global_events_response()
 
     # Scholarships & career
-    if _contains_any(n, ['scholarship', 'funding', 'financial support', 'bursary', 'grant']):
+    scholarship_keywords = ['scholarship', 'funding', 'financial support', 'bursary', 'grant', 'fund', 'financial', 'money']
+    if _contains_any(n, scholarship_keywords):
         return _scholarships_response()
 
-    if _contains_any(n, ['career', 'job', 'internship', 'cv', 'resume', 'interview', 'mentorship']):
+    career_keywords = ['career', 'job', 'internship', 'cv', 'resume', 'interview', 'mentorship', 'employment', 'work', 'professional', 'opportunity']
+    if _contains_any(n, career_keywords):
         return _career_response()
 
-    if _contains_any(n, ['skill', 'what will i gain', 'what do i learn', 'benefit of joining', 'why join']):
+    skill_keywords = ['skill', 'what will i gain', 'what do i learn', 'benefit of joining', 'why join', 'why should i', 'learn', 'develop']
+    if _contains_any(n, skill_keywords):
         return _skills_response()
 
     # Activities
-    if _contains_any(n, ['activit', 'what do you do', 'chapter do', 'program', 'hackathon', 'field trip', 'outreach', 'community']):
+    activity_keywords = ['activit', 'what do you do', 'chapter do', 'program', 'hackathon', 'field trip', 'outreach', 'community', 'workshop', 'seminar', 'talk', 'event', 'organize']
+    if _contains_any(n, activity_keywords):
         return _activities_response()
 
     # Mission / Vision / About
-    if _contains_any(n, ['mission', 'vision', 'goal', 'purpose', 'objective']):
+    if _contains_any(n, ['mission', 'vision', 'goal', 'purpose', 'objective', 'what are we trying']):
         return _mission_response()
 
-    if _contains_any(n, ['about', 'what is spe udom', 'who are you', 'tell me about', 'what is the chapter']):
+    about_keywords = ['about', 'what is spe udom', 'who are you', 'tell me about', 'what is the chapter', 'spe udom', 'this chapter']
+    if _contains_any(n, about_keywords):
         return _about_response()
 
-    # Leadership
-    if _contains_any(n, ['leader', 'leadership', 'president', 'vice president', 'secretary', 'treasurer', 'advisor', 'officer', 'chairperson', 'web master']):
+    # Leadership (higher specificity to avoid false matches)
+    leadership_keywords = ['leader', 'leadership', 'president', 'vice president', 'secretary', 'treasurer', 'advisor', 'officer', 'chairperson', 'web master', 'who is', 'who leads', 'who runs']
+    if _contains_any(n, leadership_keywords):
         return _leadership_response(n)
 
-    # Events
-    if _contains_any(n, ['event', 'workshop', 'seminar', 'training', 'field trip', 'upcoming', 'competition', 'networking']):
-        return _events_response(n)
-
     # Elections
-    if _contains_any(n, ['election', 'vote', 'candidate', 'voting', 'ballot', 'elect']):
+    election_keywords = ['election', 'vote', 'candidate', 'voting', 'ballot', 'elect', 'voting process', 'how to vote']
+    if _contains_any(n, election_keywords):
         return _elections_response(n)
 
-    # Publications
-    if _contains_any(n, ['publication', 'paper', 'research', 'article', 'document', 'report', 'journal']):
+    # Events & Publications (after more specific checks)
+    event_keywords = ['event', 'workshop', 'seminar', 'training', 'field trip', 'upcoming', 'competition', 'networking', 'when is', 'schedule']
+    if _contains_any(n, event_keywords):
+        return _events_response(n)
+
+    publication_keywords = ['publication', 'paper', 'research', 'article', 'document', 'report', 'journal', 'read', 'download']
+    if _contains_any(n, publication_keywords):
         return _publications_response(n)
 
     # Contact
-    if _contains_any(n, ['contact', 'email', 'location', 'address', 'office', 'where', 'find you', 'reach']):
+    contact_keywords = ['contact', 'email', 'location', 'address', 'office', 'where', 'find you', 'reach', 'call', 'phone', 'how to reach']
+    if _contains_any(n, contact_keywords):
         return _contact_response()
 
+    # If nothing matched, return helpful fallback
     return FALLBACK_RESPONSE

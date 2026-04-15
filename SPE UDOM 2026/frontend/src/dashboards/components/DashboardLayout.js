@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import Toast from '../../components/Toast';
 import SiteFooter from '../../components/SiteFooter';
 import TopBanner from '../../components/TopBanner';
 import PageHeader from '../../components/PageHeader';
@@ -63,16 +64,19 @@ const DashboardLayout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768);
+  const [toast, setToast] = useState(null);
 
   const menu = menuByRole[user?.role] || menuByRole.member;
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    setToast({ message: `Goodbye ${user?.full_name}! See you next time.`, type: 'success' });
+    setTimeout(() => navigate('/login'), 1200);
   };
 
   return (
     <div className="dash-wrapper">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <TopBanner />
       <PageHeader />
       {sidebarOpen && window.innerWidth < 768 && (
