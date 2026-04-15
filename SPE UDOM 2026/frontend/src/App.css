@@ -56,6 +56,23 @@ a { text-decoration: none; }
   line-height: 1.6;
 }
 
+/* Mobile improvements */
+@media (max-width: 480px) {
+  .page-container {
+    padding: 14px 12px;
+    max-width: 100%;
+  }
+  
+  .page-container h1 {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+  }
+  
+  .page-container p {
+    font-size: 0.86rem;
+  }
+}
+
 /* ── Leadership Page ────────────────────────────────────── */
 .leadership-page { max-width: 900px; }
 

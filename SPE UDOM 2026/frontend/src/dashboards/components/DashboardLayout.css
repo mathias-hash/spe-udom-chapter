@@ -256,6 +256,12 @@ tr:last-child td { border-bottom: none; }
 .btn-danger { background: #dc3545; color: #fff; }
 .btn-sm { padding: 5px 10px; font-size: 0.8rem; }
 
+/* Mobile touch-friendly buttons */
+@media (max-width: 768px) {
+  .btn { padding: 10px 16px; min-height: 44px; }
+  .btn-sm { padding: 8px 12px; }
+}
+
 /* Forms */
 .dash-form { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); max-width: 520px; }
 .dash-form h3 { margin-bottom: 18px; color: #333; }
@@ -265,6 +271,40 @@ tr:last-child td { border-bottom: none; }
   padding: 9px 12px; border: 1.5px solid #ddd; border-radius: 7px; font-size: 0.92rem; outline: none;
 }
 .dash-form input:focus, .dash-form textarea:focus { border-color: #0066cc; }
+
+/* Mobile-friendly form inputs */
+@media (max-width: 768px) {
+  .dash-form {
+    padding: 16px;
+    max-width: 100%;
+  }
+  
+  .dash-form input, .dash-form textarea, .dash-form select {
+    padding: 12px;
+    font-size: 16px; /* Prevents zooming on iOS */
+    min-height: 44px;
+  }
+  
+  .dash-form .form-group {
+    margin-bottom: 16px;
+  }
+
+  .dash-form .form-group h4 {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dash-form {
+    padding: 14px;
+    border-radius: 8px;
+  }
+  
+  .dash-form h3 {
+    font-size: 1.1rem;
+    margin-bottom: 16px;
+  }
+}
 
 @media (max-width: 768px) {
   .dash-sidebar { transform: translateX(-160px); }
@@ -281,6 +321,77 @@ tr:last-child td { border-bottom: none; }
   .dash-topbar { width: calc(100% - 12px); margin-top: 8px; }
   .dash-content { padding: 10px 8px 12px; }
   .stat-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .dash-sidebar {
+    width: 140px;
+  }
+  
+  .dash-sidebar.closed {
+    transform: translateX(-140px);
+  }
+  
+  .dash-sidebar:not(.closed) {
+    transform: translateX(0);
+  }
+  
+  .dash-link {
+    padding: 8px 10px;
+    font-size: 0.78rem;
+  }
+  
+  .dash-role-badge {
+    font-size: 0.68rem;
+    padding: 3px 10px;
+    margin: 0 12px 12px;
+  }
+  
+  .dash-topbar {
+    padding: 6px 12px;
+    width: calc(100% - 10px);
+    margin: 6px 5px 0;
+  }
+  
+  .dash-content {
+    padding: 8px 6px 10px;
+  }
+  
+  .stat-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  
+  .stat-card {
+    padding: 10px;
+    border-radius: 6px;
+  }
+  
+  .stat-card .stat-value {
+    font-size: 1.4rem;
+  }
+  
+  .stat-card .stat-label {
+    font-size: 0.75rem;
+    margin-top: 2px;
+  }
+  
+  table {
+    font-size: 0.8rem;
+  }
+  
+  th {
+    padding: 6px 8px;
+  }
+  
+  td {
+    padding: 6px 8px;
+  }
+  
+  .dash-form {
+    max-width: 100%;
+  }
 }
 
 /* Override PageHeader left offset for dashboard (sidebar is 160px not 240px) */

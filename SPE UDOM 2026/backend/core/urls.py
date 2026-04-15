@@ -1,4 +1,4 @@
-from django.urls import path, re_path
+from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 from . import views
 
@@ -70,10 +70,10 @@ urlpatterns = [
     path('president-dashboard/', views.president_dashboard),
     path('secretary-dashboard/', views.secretary_dashboard),
 
-    # Annual Report (use re_path to capture year format YYYY/YYYY)
+    # Annual Report
     path('annual-reports/', views.annual_report_list),
-    re_path(r'^annual-reports/(?P<year>\d{4}/\d{4})/$', views.annual_report_detail),
-    re_path(r'^annual-reports/(?P<year>\d{4}/\d{4})/financial/$', views.annual_report_financial),
-    re_path(r'^annual-reports/(?P<year>\d{4}/\d{4})/images/(?P<section>[\w_]+)/$', views.annual_report_upload_image),
+    path('annual-reports/<path:year>/', views.annual_report_detail),
+    path('annual-reports/<path:year>/financial/', views.annual_report_financial),
+    path('annual-reports/<path:year>/images/<str:section>/', views.annual_report_upload_image),
     path('annual-reports/images/<int:pk>/', views.annual_report_delete_image),
 ]
