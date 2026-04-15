@@ -99,7 +99,7 @@
   .page-header-tagline { display: none; }
 }
 
-/* Mobile-only section with Student Chapter and tagline */
+/* Mobile-only section with tagline */
 .page-header-mobile-section {
   display: none;
   position: fixed;
@@ -109,18 +109,8 @@
   padding: 10px 20px;
   background: #f9fafb;
   border-bottom: 1px solid #e0eaf8;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
+  justify-content: center;
   z-index: 899;
-}
-
-.mobile-section-text {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: #666;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
 }
 
 .mobile-tagline {

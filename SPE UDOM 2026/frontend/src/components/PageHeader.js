@@ -217,9 +217,8 @@ const PageHeader = () => {
         </div>
       </div>
 
-      {/* Mobile-only header with Student Chapter and tagline */}
+      {/* Mobile-only tagline section */}
       <div className="page-header-mobile-section">
-        <span className="mobile-section-text">Student Chapter</span>
         <span className="mobile-tagline">Solutions. People. Energy.</span>
       </div>
 
