@@ -594,7 +594,10 @@ def public_election(request):
     if not election:
         election = Election.objects.order_by('-created_at').first()
     if not election:
-        return Response({'error': 'No election found'}, status=404)
+        return Response({
+            'message': 'No election available yet',
+            'results': None,
+        })
     return Response(ElectionSerializer(election, context={'request': request}).data)
 
 

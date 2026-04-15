@@ -28,7 +28,7 @@ Deploy the `SPE UDOM 2026/backend` folder.
 - Start command: `gunicorn backend.wsgi:application`
 - Run once after first deploy: `python manage.py migrate`
 
-## Frontend: Netlify or Vercel
+## Frontend: Netlify, Vercel, or Render
 
 Deploy the `frontend` folder.
 
@@ -49,6 +49,13 @@ Deploy the `frontend` folder.
 - Framework preset: Create React App / React
 - Build command: `npm run build`
 - Output directory: `build`
+
+### Render
+
+- Static site root directory: `SPE UDOM 2026/frontend`
+- Build command: `npm install && npm run build`
+- Publish directory: `build`
+- Use the included [render.yaml](/c:/Users/musa kulwa/spe-udom-chapter/SPE UDOM 2026/frontend/render.yaml:1) so Render rewrites routes like `/leadership` to `index.html`
 
 ## Final wiring
 
