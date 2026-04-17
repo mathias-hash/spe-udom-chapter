@@ -47,6 +47,7 @@ urlpatterns = [
 
     # Announcements
     path('announcements/', views.announcements),
+    path('announcements/<int:pk>/', views.delete_announcement),
 
     # Publications
     path('publications/', views.publications),

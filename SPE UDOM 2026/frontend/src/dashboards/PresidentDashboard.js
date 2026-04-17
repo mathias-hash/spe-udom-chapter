@@ -109,6 +109,18 @@ const Announcements = () => {
     } else setToast({ message: 'Failed to send announcement.', type: 'error' });
   };
 
+  const deleteAnnouncement = async (id) => {
+    if (window.confirm('Are you sure you want to delete this announcement?')) {
+      const { ok } = await api(`/announcements/${id}/`, { method: 'DELETE' });
+      if (ok) {
+        setList(list.filter(a => a.id !== id));
+        setToast({ message: 'Announcement deleted successfully!', type: 'success' });
+      } else {
+        setToast({ message: 'Failed to delete announcement.', type: 'error' });
+      }
+    }
+  };
+
   return (
     <>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
@@ -123,8 +135,20 @@ const Announcements = () => {
       <div className="dash-table-wrap">
         <h3>Sent Announcements</h3>
         <table>
-          <thead><tr><th>Title</th><th>Message</th><th>Date</th></tr></thead>
-          <tbody>{list.map(a => <tr key={a.id}><td>{a.title}</td><td>{a.message.substring(0, 80)}...</td><td>{new Date(a.created_at).toLocaleDateString()}</td></tr>)}</tbody>
+          <thead><tr><th>Title</th><th>Message</th><th>Date</th><th>Actions</th></tr></thead>
+          <tbody>
+            {list.length === 0 && <tr><td colSpan={4} style={{ textAlign: 'center', color: '#888' }}>No announcements yet</td></tr>}
+            {list.map(a => (
+              <tr key={a.id}>
+                <td>{a.title}</td>
+                <td>{a.message.substring(0, 80)}...</td>
+                <td>{new Date(a.created_at).toLocaleDateString()}</td>
+                <td>
+                  <button className="btn btn-danger btn-sm" onClick={() => deleteAnnouncement(a.id)}>Delete</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
     </>

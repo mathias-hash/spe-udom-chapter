@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { login as apiLogin, api } from '../utils/api';
+import { login as apiLogin, api, API_BASE_URL } from '../utils/api';
 import logo from '../assets/spe-udom-logo.png';
 import './PageHeader.css';
 
@@ -89,11 +89,22 @@ const normalizeErrors = data => {
   return { non_field_errors: ['Unable to process the server response.'] };
 };
 
+const resolveMediaUrl = value => {
+  if (!value) return '';
+  if (/^https?:\/\//i.test(value)) return value;
+  return `${API_BASE_URL}${value.startsWith('/') ? value : `/${value}`}`;
+};
+
 const PageHeader = () => {
-  const { user, login, logout } = useAuth();
+  const { user, login, logout, updateUser } = useAuth();
   const navigate = useNavigate();
   const [modal, setModal] = useState(null); // 'login' | 'register' | 'profile' | null
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [profileErrors, setProfileErrors] = useState({});
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profilePhotoFile, setProfilePhotoFile] = useState(null);
+  const [profilePhotoPreview, setProfilePhotoPreview] = useState('');
+  const photoInputRef = useRef(null);
 
   // Login form state
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
@@ -109,6 +120,13 @@ const PageHeader = () => {
     setModal(null);
     setLoginErrors({});
     setRegErrors({});
+    setProfileErrors({});
+    setProfileLoading(false);
+    setProfilePhotoFile(null);
+    setProfilePhotoPreview(resolveMediaUrl(user?.profile_picture));
+    if (photoInputRef.current) {
+      photoInputRef.current.value = '';
+    }
     setLoginForm({ email: '', password: '' });
     setRegForm({ full_name: '', email: '', password: '', confirm_password: '', phone: '', year_of_study: '' });
   };
@@ -122,6 +140,10 @@ const PageHeader = () => {
     }
     return () => document.body.classList.remove('no-scroll');
   }, [modal]);
+
+  useEffect(() => {
+    setProfilePhotoPreview(resolveMediaUrl(user?.profile_picture));
+  }, [user]);
 
   const handleLogin = async e => {
     e.preventDefault();
@@ -169,6 +191,72 @@ const PageHeader = () => {
     setRegLoading(false);
   };
 
+  const handleProfilePhotoChange = e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setProfileErrors({ profile_picture: ['Please choose a valid image file.'] });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setProfileErrors({ profile_picture: ['Image size must be 5MB or less.'] });
+      return;
+    }
+
+    setProfilePhotoFile(file);
+    setProfileErrors({});
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setProfilePhotoPreview(reader.result?.toString() || '');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleProfilePhotoSave = async () => {
+    if (!profilePhotoFile) return;
+
+    setProfileLoading(true);
+    setProfileErrors({});
+
+    const body = new FormData();
+    body.append('profile_picture', profilePhotoFile);
+
+    try {
+      const res = await api('/auth/profile/', {
+        method: 'PUT',
+        body,
+      });
+
+      if (res.ok) {
+        updateUser(res.data);
+        setProfilePhotoFile(null);
+        setProfilePhotoPreview(resolveMediaUrl(res.data.profile_picture));
+        if (photoInputRef.current) {
+          photoInputRef.current.value = '';
+        }
+      } else {
+        setProfileErrors(normalizeErrors(res.data));
+      }
+    } catch {
+      setProfileErrors({ non_field_errors: ['Could not update your profile photo right now.'] });
+    }
+
+    setProfileLoading(false);
+  };
+
+  const initials = user?.full_name
+    ? user.full_name
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(word => word[0].toUpperCase())
+        .join('')
+    : '?';
+  const profilePhoto = profilePhotoPreview || resolveMediaUrl(user?.profile_picture);
+
   return (
     <>
       <div className="page-header">
@@ -184,14 +272,16 @@ const PageHeader = () => {
           {user ? (
             <div className="ph-avatar-wrap">
               <button className="ph-avatar" onClick={() => setDropdownOpen(o => !o)} title={user.full_name}>
-                {user.full_name?.charAt(0).toUpperCase()}
+                {profilePhoto ? <img src={profilePhoto} alt={user.full_name} className="ph-avatar-image" /> : initials}
               </button>
               <div className="ph-online-indicator-small" title="Online"></div>
               {dropdownOpen && (
                 <div className="ph-dropdown">
                   <div className="ph-drop-item ph-drop-header">
                     <div className="ph-drop-avatar-wrap">
-                      <div className="ph-drop-avatar">{user.full_name?.charAt(0).toUpperCase()}</div>
+                      <div className="ph-drop-avatar">
+                        {profilePhoto ? <img src={profilePhoto} alt={user.full_name} className="ph-avatar-image" /> : initials}
+                      </div>
                       <div className="ph-online-indicator-small" title="Online"></div>
                     </div>
                     <div>
@@ -296,12 +386,52 @@ const PageHeader = () => {
             {modal === 'profile' && user && (
               <>
                 <h3>My Profile</h3>
-                <p className="ph-modal-sub">Your account information</p>
+                <p className="ph-modal-sub">Your account information and profile photo</p>
                 <div className="ph-profile-card">
-                  <div className="ph-profile-avatar-wrapper">
-                    <div className="ph-profile-avatar">{user.full_name?.charAt(0).toUpperCase()}</div>
-                    <div className="ph-online-indicator" title="Online"></div>
+                  <div className="ph-profile-hero">
+                    <div className="ph-profile-avatar-wrapper">
+                      <div className="ph-profile-avatar">
+                        {profilePhoto ? <img src={profilePhoto} alt={user.full_name} className="ph-avatar-image" /> : initials}
+                      </div>
+                      <div className="ph-online-indicator" title="Online"></div>
+                    </div>
+                    <div className="ph-profile-summary">
+                      <h4>{user.full_name}</h4>
+                      <p>{user.email}</p>
+                      <span className="ph-role-badge">{user.role?.replace(/_/g, ' ').toUpperCase()}</span>
+                    </div>
                   </div>
+
+                  <div className="ph-profile-photo-panel">
+                    <input
+                      ref={photoInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="ph-hidden-file-input"
+                      onChange={handleProfilePhotoChange}
+                    />
+                    <div className="ph-profile-photo-copy">
+                      <strong>Profile Photo</strong>
+                      <span>Upload a clear image so your account feels personal and easy to recognize.</span>
+                    </div>
+                    <div className="ph-profile-photo-actions">
+                      <button type="button" className="ph-secondary-btn" onClick={() => photoInputRef.current?.click()}>
+                        {profilePhoto ? 'Change Photo' : 'Upload Photo'}
+                      </button>
+                      <button
+                        type="button"
+                        className="ph-primary-btn"
+                        onClick={handleProfilePhotoSave}
+                        disabled={!profilePhotoFile || profileLoading}
+                      >
+                        {profileLoading ? 'Saving...' : 'Save Photo'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {profileErrors.profile_picture && <span className="ph-error">{profileErrors.profile_picture}</span>}
+                  {profileErrors.non_field_errors && <span className="ph-error">{profileErrors.non_field_errors}</span>}
+
                   <div className="ph-profile-info">
                     <div className="ph-profile-row">
                       <label>Name</label>
@@ -329,7 +459,14 @@ const PageHeader = () => {
                     </div>
                   </div>
                 </div>
-                <button type="button" onClick={closeModal} className="ph-modal-form" style={{ width: '100%', padding: '10px', background: '#0066cc', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: '700', fontSize: '0.95rem', cursor: 'pointer', marginTop: '16px' }}>Close</button>
+                <div className="ph-profile-footer">
+                  <button type="button" onClick={() => { closeModal(); navigate('/dashboard/profile'); }} className="ph-secondary-btn">
+                    Open Full Profile
+                  </button>
+                  <button type="button" onClick={closeModal} className="ph-primary-btn">
+                    Close
+                  </button>
+                </div>
               </>
             )}
           </div>

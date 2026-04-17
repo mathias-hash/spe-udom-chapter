@@ -14,7 +14,7 @@ const navItems = [
   { path: '/election', label: 'Election' },
 ];
 
-const Navbar = () => {
+const Navbar = ({ showBanner = true }) => {
   const location = useLocation();
   const [open, setOpen] = useState(false);
 
@@ -22,7 +22,7 @@ const Navbar = () => {
 
   return (
     <>
-      <TopBanner />
+      {showBanner && <TopBanner />}
       <nav className="desktop-nav" aria-label="Desktop menu">
         <div className="desktop-nav-inner">
           {navItems.map(({ path, label }) => (

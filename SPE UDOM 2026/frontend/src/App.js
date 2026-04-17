@@ -2,7 +2,6 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import LiveChat from './components/LiveChat';
-import Navbar from './components/Navbar';
 import SiteFooter from './components/SiteFooter';
 import Home from './pages/Home';
 import About from './pages/About';
@@ -35,7 +34,6 @@ const DashboardRouter = () => {
 
 const PublicLayout = () => (
   <>
-    <Navbar />
     <PageHeader />
     <div className="main-content">
       <Routes>

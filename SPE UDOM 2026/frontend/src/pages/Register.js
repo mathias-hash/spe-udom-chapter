@@ -5,6 +5,7 @@ import { api } from '../utils/api';
 import Toast from '../components/Toast';
 import AuthSlideshow from '../components/AuthSlideshow';
 import TopBanner from '../components/TopBanner';
+import Navbar from '../components/Navbar';
 import logo from '../assets/spe-udom-logo.png';
 import './Auth.css';
 
@@ -71,6 +72,7 @@ const Register = () => {
       {/* Main Auth Content */}
       <div className="auth-wrapper">
         <TopBanner />
+        <Navbar showBanner={false} />
         {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
         {/* Left — Slideshow */}

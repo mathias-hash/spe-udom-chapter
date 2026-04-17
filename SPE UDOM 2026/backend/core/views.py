@@ -519,6 +519,23 @@ def announcements(request):
     return Response(s.errors, status=400)
 
 
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_announcement(request, pk):
+    try:
+        announcement = Announcement.objects.get(id=pk)
+    except Announcement.DoesNotExist:
+        return Response({'error': 'Announcement not found'}, status=404)
+    
+    # Check permissions - only admin/president can delete
+    if request.user.role not in ['admin', 'president']:
+        return Response({'error': 'Permission denied'}, status=403)
+    
+    log_security_event('ANNOUNCEMENT_DELETED', user=request.user, details=f'Announcement: {announcement.title}')
+    announcement.delete()
+    return Response({'message': 'Announcement deleted successfully'}, status=200)
+
+
 # ── Publications ──────────────────────────────────────────────
 @api_view(['GET', 'POST'])
 @parser_classes([MultiPartParser, FormParser, JSONParser])
