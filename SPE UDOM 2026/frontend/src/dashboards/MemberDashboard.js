@@ -21,11 +21,13 @@ const MemberOverview = () => {
   }, []);
   return (
     <>
-      <h2 style={{ marginBottom: 20, color: '#333' }}>Welcome, {user?.full_name}</h2>
-      <p style={{ color: '#64748b', marginBottom: 18, maxWidth: 760, lineHeight: 1.7 }}>
-        Here is your member overview, where you can quickly follow chapter updates, track your activity,
-        and move smoothly to events, voting, publications, and support whenever you need them.
-      </p>
+      <div style={{ background: '#0055b3', borderRadius: 12, padding: '20px 28px', marginBottom: 24 }}>
+        <h2 style={{ margin: 0, color: '#fff', fontFamily: '"Times New Roman", Times, serif', fontWeight: 800 }}>Welcome, {user?.full_name}</h2>
+        <p style={{ color: '#fff', margin: '8px 0 0', fontFamily: '"Times New Roman", Times, serif', lineHeight: 1.7, opacity: 0.93 }}>
+          Here is your member overview, where you can quickly follow chapter updates, track your activity,
+          and move smoothly to events, voting, publications, and support whenever you need them.
+        </p>
+      </div>
       <div className="stat-grid">
         <div className="stat-card"><div className="stat-value">{events.length}</div><div className="stat-label">Available Events</div></div>
         <div className="stat-card"><div className="stat-value">{events.filter(e => e.is_registered).length}</div><div className="stat-label">My Registrations</div></div>

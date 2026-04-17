@@ -26,11 +26,13 @@ const AdminOverview = () => {
   if (loading) return <Spinner />;
   return (
     <>
-      <h2 style={{ marginBottom: 20, color: '#333' }}>Admin Dashboard</h2>
-      <p style={{ color: '#64748b', marginBottom: 18, maxWidth: 820, lineHeight: 1.7 }}>
-        This overview brings together the chapter&apos;s key administration signals so you can monitor operations,
-        review activity quickly, and move directly to the tools that need your attention.
-      </p>
+      <div style={{ background: '#0055b3', borderRadius: 12, padding: '20px 28px', marginBottom: 24 }}>
+        <h2 style={{ margin: 0, color: '#fff', fontFamily: '"Times New Roman", Times, serif', fontWeight: 800 }}>Admin Dashboard</h2>
+        <p style={{ color: '#fff', margin: '8px 0 0', fontFamily: '"Times New Roman", Times, serif', lineHeight: 1.7, opacity: 0.93 }}>
+          This overview brings together the chapter&apos;s key administration signals so you can monitor operations,
+          review activity quickly, and move directly to the tools that need your attention.
+        </p>
+      </div>
       <div className="stat-grid">
         <StatCard label="Total Members" value={stats.total_members} />
         <StatCard label="Total Events" value={stats.total_events} />

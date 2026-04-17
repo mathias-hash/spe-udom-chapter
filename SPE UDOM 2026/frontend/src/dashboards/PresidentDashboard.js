@@ -19,11 +19,13 @@ const PresidentOverview = () => {
   useEffect(() => { api('/president-dashboard/').then(r => setStats(r.data)); }, []);
   return (
     <>
-      <h2 style={{ marginBottom: 20, color: '#333' }}>President Dashboard</h2>
-      <p style={{ color: '#64748b', marginBottom: 18, maxWidth: 800, lineHeight: 1.7 }}>
-        This overview helps you stay aligned with membership growth, chapter activity, approvals,
-        and communication so you can guide the chapter with clear and timely decisions.
-      </p>
+      <div style={{ background: '#0055b3', borderRadius: 12, padding: '20px 28px', marginBottom: 24 }}>
+        <h2 style={{ margin: 0, color: '#fff', fontFamily: '"Times New Roman", Times, serif', fontWeight: 800 }}>President Dashboard</h2>
+        <p style={{ color: '#fff', margin: '8px 0 0', fontFamily: '"Times New Roman", Times, serif', lineHeight: 1.7, opacity: 0.93 }}>
+          This overview helps you stay aligned with membership growth, chapter activity, approvals,
+          and communication so you can guide the chapter with clear and timely decisions.
+        </p>
+      </div>
       <div className="stat-grid">
         <StatCard label="Total Members" value={stats.total_members} />
         <StatCard label="Approved Events" value={stats.approved_events} />

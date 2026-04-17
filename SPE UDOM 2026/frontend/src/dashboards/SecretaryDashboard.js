@@ -50,11 +50,13 @@ const SecretaryOverview = () => {
   if (loading) return <Spinner />;
   return (
     <>
-      <h2 style={{ marginBottom: 20, color: '#333' }}>General Secretary Dashboard</h2>
-      <p style={{ color: '#64748b', marginBottom: 18, maxWidth: 820, lineHeight: 1.7 }}>
-        This overview keeps your election, publication, and reporting responsibilities in one place,
-        making it easier to coordinate records, maintain transparency, and keep chapter information current.
-      </p>
+      <div style={{ background: '#0055b3', borderRadius: 12, padding: '20px 28px', marginBottom: 24 }}>
+        <h2 style={{ margin: 0, color: '#fff', fontFamily: '"Times New Roman", Times, serif', fontWeight: 800 }}>General Secretary Dashboard</h2>
+        <p style={{ color: '#fff', margin: '8px 0 0', fontFamily: '"Times New Roman", Times, serif', lineHeight: 1.7, opacity: 0.93 }}>
+          This overview keeps your election, publication, and reporting responsibilities in one place,
+          making it easier to coordinate records, maintain transparency, and keep chapter information current.
+        </p>
+      </div>
       <div className="stat-grid">
         <StatCard label="Total Elections" value={stats.total_elections} />
         <StatCard label="Open Elections" value={stats.open_elections} />
