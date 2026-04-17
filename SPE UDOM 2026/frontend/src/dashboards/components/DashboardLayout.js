@@ -63,7 +63,11 @@ const DashboardLayout = ({ children }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768);
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    // On mobile, sidebar starts closed
+    // On desktop, sidebar starts open
+    return typeof window !== 'undefined' ? window.innerWidth >= 768 : true;
+  });
   const [toast, setToast] = useState(null);
 
   const menu = menuByRole[user?.role] || menuByRole.member;

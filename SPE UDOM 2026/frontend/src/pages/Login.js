@@ -24,6 +24,7 @@ const Login = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -112,17 +113,27 @@ const Login = () => {
                 />
                 {errors.email && <span className="error">{errors.email}</span>}
               </div>
-              <div className="form-group">
+              <div className="form-group password-group">
                 <label>Password</label>
-                <input
-                  type="password"
-                  name="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  placeholder="Password"
-                  autoComplete="current-password"
-                  required
-                />
+                <div className="password-input-wrapper">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    value={form.password}
+                    onChange={handleChange}
+                    placeholder="Password"
+                    autoComplete="current-password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? '👁️' : '👁️‍🗨️'}
+                  </button>
+                </div>
                 {errors.password && <span className="error">{errors.password}</span>}
               </div>
               {errors.non_field_errors && <p className="error">{errors.non_field_errors}</p>}
