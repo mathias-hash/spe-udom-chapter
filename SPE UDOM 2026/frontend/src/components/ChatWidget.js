@@ -61,10 +61,7 @@ const ChatWidget = () => {
         const data = await response.json();
         if (!ignore) {
           setRoom(data);
-          setMessages(data.messages || []);
-          if (!guestName && data.sender_role === 'guest') {
-            setGuestName(data.display_name || 'Guest User');
-          }
+          setMessages([]);
         }
       } catch (error) {
         if (!ignore) {
