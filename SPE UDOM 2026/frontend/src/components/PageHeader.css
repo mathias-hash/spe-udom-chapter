@@ -487,6 +487,13 @@ body.ph-modal-open .sidebar {
   animation: fadeIn 0.2s ease-out;
 }
 
+@media (min-width: 768px) {
+  .ph-modal-backdrop {
+    align-items: center;
+    padding: 24px 16px;
+  }
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
