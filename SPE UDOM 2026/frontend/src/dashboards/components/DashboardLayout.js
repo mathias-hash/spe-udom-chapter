@@ -83,9 +83,7 @@ const DashboardLayout = ({ children }) => {
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <TopBanner />
       <PageHeader />
-      {sidebarOpen && window.innerWidth < 768 && (
-        <div className="dash-sidebar-overlay" onClick={() => setSidebarOpen(false)} />
-      )}
+      <div className={`dash-sidebar-overlay ${sidebarOpen && window.innerWidth < 768 ? 'active' : ''}`} onClick={() => setSidebarOpen(false)} />
       <aside className={`dash-sidebar ${sidebarOpen ? '' : 'closed'}`}>
         <div className="dash-role-badge">{user?.role?.replace('_', ' ').toUpperCase()}</div>
         <nav className="dash-nav">

@@ -99,47 +99,49 @@ class TokenManager {
 }
 
 const tokenManager = new TokenManager();
+let refreshPromise = null;
 
 /**
  * Refresh access token with retry protection
  */
 const refreshAccessToken = async () => {
-  // Prevent multiple simultaneous refresh attempts
-  if (tokenManager.isRefreshing) {
-    return null;
-  }
+  if (refreshPromise) return refreshPromise;
 
   const refresh = tokenManager.getRefreshToken();
   if (!refresh) return null;
 
-  tokenManager.isRefreshing = true;
+  refreshPromise = (async () => {
+    tokenManager.isRefreshing = true;
 
-  try {
-    const res = await fetch(`${API_BASE}/auth/token/refresh/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-      },
-      credentials: 'omit', // Don't send cookies (using JWT)
-      body: JSON.stringify({ refresh }),
-    });
+    try {
+      const res = await fetch(`${API_BASE}/auth/token/refresh/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        credentials: 'omit', // Don't send cookies (using JWT)
+        body: JSON.stringify({ refresh }),
+      });
 
-    tokenManager.isRefreshing = false;
-
-    if (res.ok) {
-      const data = await res.json();
-      if (data.access) {
-        tokenManager.setAccessToken(data.access);
-        return data.access;
+      if (res.ok) {
+        const data = await res.json();
+        if (data.access) {
+          tokenManager.setAccessToken(data.access);
+          return data.access;
+        }
       }
+    } catch (error) {
+      console.error('Token refresh error:', error);
+    } finally {
+      tokenManager.isRefreshing = false;
+      refreshPromise = null;
     }
-  } catch (error) {
-    console.error('Token refresh error:', error);
-    tokenManager.isRefreshing = false;
-  }
 
-  return null;
+    return null;
+  })();
+
+  return refreshPromise;
 };
 
 /**
@@ -155,7 +157,15 @@ export const api = async (endpoint, options = {}, retryAttempt = 0) => {
     return { ok: false, status: 400, data: { error: 'Invalid endpoint' } };
   }
 
-  const token = tokenManager.getAccessToken();
+  let token = tokenManager.getAccessToken();
+  const refreshToken = tokenManager.getRefreshToken();
+  if (token && refreshToken && tokenManager.isTokenExpired(token)) {
+    token = await refreshAccessToken();
+    if (!token) {
+      handleAuthenticationFailure();
+      return { ok: false, status: 401, data: { error: 'Authentication failed' } };
+    }
+  }
   const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
   const headers = {
     'Content-Type': 'application/json',
