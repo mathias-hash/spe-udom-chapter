@@ -466,8 +466,7 @@
 }
 
 /* Hide sidebar when modal is open */
-body.ph-modal-open .sidebar,
-body.ph-modal-open .sidebar-hamburger {
+body.ph-modal-open .sidebar {
   display: none !important;
 }
 
