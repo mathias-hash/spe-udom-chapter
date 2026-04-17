@@ -475,9 +475,10 @@
   background: rgba(0,0,0,0.5);
   z-index: 3000; 
   display: flex; 
-  align-items: center; 
+  align-items: flex-start; 
   justify-content: center;
-  padding: 16px;
+  padding: 110px 16px 24px;
+  overflow-y: auto;
   animation: fadeIn 0.2s ease-out;
 }
 
