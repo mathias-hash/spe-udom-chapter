@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Toast from '../../components/Toast';
@@ -63,6 +63,9 @@ const DashboardLayout = ({ children }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const [isMobile, setIsMobile] = useState(() => (
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  ));
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     // On mobile, sidebar starts closed
     // On desktop, sidebar starts open
@@ -71,6 +74,23 @@ const DashboardLayout = ({ children }) => {
   const [toast, setToast] = useState(null);
 
   const menu = menuByRole[user?.role] || menuByRole.member;
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      setSidebarOpen(!mobile);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -83,16 +103,16 @@ const DashboardLayout = ({ children }) => {
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <TopBanner />
       <PageHeader />
-      <div className={`dash-sidebar-overlay ${sidebarOpen && window.innerWidth < 768 ? 'active' : ''}`} onClick={() => setSidebarOpen(false)} />
+      <div className={`dash-sidebar-overlay ${sidebarOpen && isMobile ? 'active' : ''}`} onClick={() => setSidebarOpen(false)} />
       <aside className={`dash-sidebar ${sidebarOpen ? '' : 'closed'}`}>
         <div className="dash-role-badge">{user?.role?.replace('_', ' ').toUpperCase()}</div>
-        <nav className="dash-nav">
+        <nav className="dash-nav" id="dashboard-navigation">
           {menu.map(({ path, label }) => (
             <Link
               key={path}
               to={path}
               className={`dash-link ${location.pathname === path ? 'active' : ''}`}
-              onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
+              onClick={() => isMobile && setSidebarOpen(false)}
             >
               {label}
             </Link>
@@ -101,12 +121,15 @@ const DashboardLayout = ({ children }) => {
         <button className="dash-logout" onClick={handleLogout}>Logout</button>
       </aside>
 
-      <div className={`dash-main ${sidebarOpen ? '' : 'expanded'}`}>
+      <div className={`dash-main ${sidebarOpen ? '' : 'expanded'} ${isMobile ? 'mobile' : ''}`}>
         <header className="dash-topbar">
           <button 
             className={`dash-toggle ${sidebarOpen ? 'open' : ''}`}
             onClick={() => setSidebarOpen(!sidebarOpen)}
             title={sidebarOpen ? 'Close menu' : 'Open menu'}
+            aria-label={sidebarOpen ? 'Close dashboard menu' : 'Open dashboard menu'}
+            aria-expanded={sidebarOpen}
+            aria-controls="dashboard-navigation"
           >
             <span></span>
             <span></span>

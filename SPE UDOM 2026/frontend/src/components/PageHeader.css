@@ -245,6 +245,89 @@
 .ph-drop-logout .ph-drop-icon { color: #e53e3e; }
 .ph-drop-logout:hover { background: #fff5f5; }
 
+@media (max-width: 600px) {
+  .ph-auth {
+    gap: 4px;
+  }
+
+  .ph-avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+
+  .ph-dropdown {
+    right: -4px;
+    top: 46px;
+    min-width: min(220px, calc(100vw - 16px));
+    width: min(220px, calc(100vw - 16px));
+    max-height: calc(100vh - 150px);
+    overflow-y: auto;
+    border-radius: 14px;
+  }
+
+  .ph-drop-header {
+    padding: 10px 12px;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .ph-drop-avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 0.92rem;
+  }
+
+  .ph-drop-name {
+    font-size: 0.82rem;
+    line-height: 1.2;
+  }
+
+  .ph-drop-email {
+    font-size: 0.72rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.25;
+  }
+
+  .ph-drop-item {
+    padding: 10px 12px;
+    font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .ph-avatar {
+    width: 34px;
+    height: 34px;
+    font-size: 0.95rem;
+  }
+
+  .ph-online-indicator-small {
+    width: 10px;
+    height: 10px;
+  }
+
+  .ph-dropdown {
+    right: -6px;
+    top: 44px;
+    min-width: min(200px, calc(100vw - 12px));
+    width: min(200px, calc(100vw - 12px));
+    max-height: calc(100vh - 144px);
+  }
+
+  .ph-drop-item {
+    gap: 7px;
+    padding: 9px 11px;
+    font-size: 0.8rem;
+  }
+
+  .ph-drop-icon {
+    width: 16px;
+    height: 16px;
+  }
+}
+
 /* Profile modal card */
 .ph-profile-card {
   display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 12px;
