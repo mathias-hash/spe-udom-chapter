@@ -158,8 +158,9 @@ def login(request):
     return Response(s.errors, status=400)
 
 
-@api_view(['GET', 'PATCH'])
+@api_view(['GET', 'PATCH', 'PUT'])
 @permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
 def profile(request):
     """Get or update user profile"""
     if request.method == 'GET':

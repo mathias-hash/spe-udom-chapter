@@ -101,8 +101,7 @@ const ProfileWidget = () => {
 
   if (
     AUTH_PATHS.some((path) => location.pathname.startsWith(path)) ||
-    location.pathname.startsWith('/reset-password') ||
-    location.pathname.startsWith('/dashboard')
+    location.pathname.startsWith('/reset-password')
   ) {
     return null;
   }
