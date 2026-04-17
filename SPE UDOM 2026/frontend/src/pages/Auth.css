@@ -275,7 +275,16 @@
     padding-top: 88px;
     background: linear-gradient(160deg, #003d7a 0%, #0066cc 100%);
   }
-  .auth-slideshow-panel { display: none; }
+  .auth-slideshow-panel {
+    display: block;
+    height: 220px;
+    min-height: 220px;
+    overflow: hidden;
+  }
+  .auth-slideshow-panel .auth-slideshow {
+    min-height: 220px;
+    height: 220px;
+  }
   .auth-form-panel {
     padding: 20px 14px 32px;
     background: transparent;
