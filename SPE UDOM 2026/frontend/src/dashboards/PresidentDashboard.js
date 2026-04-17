@@ -6,6 +6,7 @@ import Toast from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../utils/api';
 import Leadership from '../pages/Leadership';
+import Contact from '../pages/Contact';
 
 const StatCard = ({ label, value }) => (
   <div className="stat-card"><div className="stat-value">{value ?? '...'}</div><div className="stat-label">{label}</div></div>
@@ -19,6 +20,10 @@ const PresidentOverview = () => {
   return (
     <>
       <h2 style={{ marginBottom: 20, color: '#333' }}>President Dashboard</h2>
+      <p style={{ color: '#64748b', marginBottom: 18, maxWidth: 800, lineHeight: 1.7 }}>
+        This overview helps you stay aligned with membership growth, chapter activity, approvals,
+        and communication so you can guide the chapter with clear and timely decisions.
+      </p>
       <div className="stat-grid">
         <StatCard label="Total Members" value={stats.total_members} />
         <StatCard label="Approved Events" value={stats.approved_events} />
@@ -324,6 +329,7 @@ const PresidentDashboard = () => (
       <Route path="/leadership" element={<Leadership />} />
       <Route path="/reports" element={<Reports />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/contact" element={<Contact />} />
     </Routes>
   </DashboardLayout>
 );

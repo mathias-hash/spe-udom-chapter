@@ -7,6 +7,7 @@ import Toast from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../utils/api';
 import Leadership from '../pages/Leadership';
+import Contact from '../pages/Contact';
 
 const extractList = (data) => Array.isArray(data) ? data : (data?.results || []);
 
@@ -21,6 +22,10 @@ const MemberOverview = () => {
   return (
     <>
       <h2 style={{ marginBottom: 20, color: '#333' }}>Welcome, {user?.full_name}</h2>
+      <p style={{ color: '#64748b', marginBottom: 18, maxWidth: 760, lineHeight: 1.7 }}>
+        Here is your member overview, where you can quickly follow chapter updates, track your activity,
+        and move smoothly to events, voting, publications, and support whenever you need them.
+      </p>
       <div className="stat-grid">
         <div className="stat-card"><div className="stat-value">{events.length}</div><div className="stat-label">Available Events</div></div>
         <div className="stat-card"><div className="stat-value">{events.filter(e => e.is_registered).length}</div><div className="stat-label">My Registrations</div></div>
@@ -481,6 +486,7 @@ const MemberDashboard = () => (
       <Route path="/elections" element={<ElectionsVote />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/suggestions" element={<Suggestions />} />
+      <Route path="/contact" element={<Contact />} />
     </Routes>
   </DashboardLayout>
 );

@@ -6,6 +6,7 @@ import ProfileExperience from './components/ProfileExperience';
 import Toast from '../components/Toast';
 import Spinner from '../components/Spinner';
 import ElectionAnalytics from '../components/ElectionAnalytics';
+import Contact from '../pages/Contact';
 import { useAuth } from '../context/AuthContext';
 import { api, apiList, API_BASE } from '../utils/api';
 
@@ -50,6 +51,10 @@ const SecretaryOverview = () => {
   return (
     <>
       <h2 style={{ marginBottom: 20, color: '#333' }}>General Secretary Dashboard</h2>
+      <p style={{ color: '#64748b', marginBottom: 18, maxWidth: 820, lineHeight: 1.7 }}>
+        This overview keeps your election, publication, and reporting responsibilities in one place,
+        making it easier to coordinate records, maintain transparency, and keep chapter information current.
+      </p>
       <div className="stat-grid">
         <StatCard label="Total Elections" value={stats.total_elections} />
         <StatCard label="Open Elections" value={stats.open_elections} />
@@ -1284,6 +1289,7 @@ const SecretaryDashboard = () => (
       <Route path="/leadership" element={<ManageLeadership />} />
       <Route path="/annual-report" element={<AnnualReport />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/contact" element={<Contact />} />
     </Routes>
   </DashboardLayout>
 );

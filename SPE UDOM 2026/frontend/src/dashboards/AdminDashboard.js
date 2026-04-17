@@ -7,6 +7,7 @@ import Toast from '../components/Toast';
 import Spinner from '../components/Spinner';
 import ElectionAnalytics from '../components/ElectionAnalytics';
 import Leadership from '../pages/Leadership';
+import Contact from '../pages/Contact';
 import { useAuth } from '../context/AuthContext';
 import { api, apiList } from '../utils/api';
 
@@ -26,6 +27,10 @@ const AdminOverview = () => {
   return (
     <>
       <h2 style={{ marginBottom: 20, color: '#333' }}>Admin Dashboard</h2>
+      <p style={{ color: '#64748b', marginBottom: 18, maxWidth: 820, lineHeight: 1.7 }}>
+        This overview brings together the chapter&apos;s key administration signals so you can monitor operations,
+        review activity quickly, and move directly to the tools that need your attention.
+      </p>
       <div className="stat-grid">
         <StatCard label="Total Members" value={stats.total_members} />
         <StatCard label="Total Events" value={stats.total_events} />
@@ -893,6 +898,7 @@ const AdminDashboard = () => (
       <Route path="/leadership" element={<Leadership />} />
       <Route path="/annual-report" element={<AnnualReportPage title="Annual Report" />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/contact" element={<Contact />} />
     </Routes>
   </DashboardLayout>
 );

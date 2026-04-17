@@ -30,6 +30,12 @@
   transform: translateX(-100%);
 }
 
+@media (min-width: 768px) {
+  .dash-sidebar.closed {
+    transform: translateX(0);
+  }
+}
+
 .dash-sidebar-overlay {
   position: fixed;
   top: 0;
@@ -43,6 +49,12 @@
 
 .dash-sidebar-overlay.active {
   display: block;
+}
+
+@media (min-width: 768px) {
+  .dash-sidebar-overlay.active {
+    display: none !important;
+  }
 }
 
 .dash-role-badge {
@@ -115,6 +127,16 @@
 }
 
 .dash-main.expanded { margin-left: 0; }
+
+@media (min-width: 768px) {
+  .dash-main {
+    margin-left: 160px !important;
+  }
+  
+  .dash-main.expanded {
+    margin-left: 160px !important;
+  }
+}
 
 .dash-topbar {
   background: #fff;
@@ -569,4 +591,87 @@ tr:last-child td { border-bottom: none; }
 
 .dash-wrapper .page-header-mobile-section {
   z-index: 200;
+}
+
+/* ===== DESKTOP MENU ENHANCEMENTS ===== */
+@media (min-width: 768px) {
+  /* Ensure sidebar is always visible on desktop */
+  .dash-sidebar {
+    display: flex !important;
+    position: fixed !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Prevent sidebar from being hidden on desktop */
+  .dash-sidebar.closed {
+    transform: translateX(0) !important;
+  }
+
+  /* Ensure main content has proper margin for sidebar */
+  .dash-main {
+    margin-left: 160px !important;
+  }
+
+  .dash-main.expanded {
+    margin-left: 160px !important;
+  }
+
+  /* Make sure overlay doesn't show on desktop */
+  .dash-sidebar-overlay {
+    display: none !important;
+  }
+
+  /* Enhance sidebar appearance on desktop */
+  .dash-sidebar {
+    box-shadow: 2px 0 12px rgba(0, 60, 140, 0.15);
+  }
+
+  .dash-nav {
+    border-top: 2px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .dash-link {
+    padding: 11px 14px;
+    font-size: 0.86rem;
+    transition: all 0.25s ease;
+  }
+
+  .dash-link:hover {
+    background: rgba(255, 255, 255, 0.15);
+    padding-left: 16px;
+  }
+
+  .dash-link.active {
+    background: rgba(255, 255, 255, 0.20);
+    border-left-color: #ffcc00;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  .dash-logout {
+    padding: 12px 14px;
+    font-size: 0.88rem;
+    transition: all 0.25s ease;
+  }
+
+  .dash-logout:hover {
+    background: rgba(255, 0, 0, 0.25);
+    padding-left: 16px;
+  }
+
+  .dash-role-badge {
+    font-size: 0.73rem;
+    padding: 5px 12px;
+    margin: 0 14px 14px;
+    letter-spacing: 0.6px;
+  }
+
+  /* Improve desktop topbar appearance */
+  .dash-topbar {
+    position: sticky;
+    top: 0;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
 }

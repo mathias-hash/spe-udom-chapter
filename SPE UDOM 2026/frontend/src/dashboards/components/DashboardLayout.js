@@ -21,7 +21,7 @@ const menuByRole = {
     { path: '/dashboard/leadership', label: 'Leadership' },
     { path: '/dashboard/annual-report', label: 'Annual Report' },
     { path: '/dashboard/profile', label: 'Profile' },
-    { path: '/contact', label: 'Contact' },
+    { path: '/dashboard/contact', label: 'Contact' },
   ],
   president: [
     { path: '/dashboard', label: 'Overview' },
@@ -32,7 +32,7 @@ const menuByRole = {
     { path: '/dashboard/suggestions', label: 'Suggestions' },
     { path: '/dashboard/leadership', label: 'Leadership' },
     { path: '/dashboard/reports', label: 'Reports' },
-    { path: '/contact', label: 'Contact' },
+    { path: '/dashboard/contact', label: 'Contact' },
   ],
   general_secretary: [
     { path: '/dashboard', label: 'Overview' },
@@ -44,7 +44,7 @@ const menuByRole = {
     { path: '/dashboard/leadership', label: 'Leadership' },
     { path: '/dashboard/annual-report', label: 'Annual Report' },
     { path: '/dashboard/records', label: 'Records' },
-    { path: '/contact', label: 'Contact' },
+    { path: '/dashboard/contact', label: 'Contact' },
   ],
   member: [
     { path: '/dashboard', label: 'Overview' },
@@ -55,7 +55,7 @@ const menuByRole = {
     { path: '/dashboard/elections', label: 'Vote' },
     { path: '/dashboard/profile', label: 'Profile' },
     { path: '/dashboard/suggestions', label: 'Suggestions' },
-    { path: '/contact', label: 'Contact' },
+    { path: '/dashboard/contact', label: 'Contact' },
   ],
 };
 
