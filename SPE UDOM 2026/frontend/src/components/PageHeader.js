@@ -135,10 +135,15 @@ const PageHeader = () => {
   useEffect(() => {
     if (modal) {
       document.body.classList.add('no-scroll');
+      document.body.classList.add('ph-modal-open');
     } else {
       document.body.classList.remove('no-scroll');
+      document.body.classList.remove('ph-modal-open');
     }
-    return () => document.body.classList.remove('no-scroll');
+    return () => {
+      document.body.classList.remove('no-scroll');
+      document.body.classList.remove('ph-modal-open');
+    };
   }, [modal]);
 
   useEffect(() => {

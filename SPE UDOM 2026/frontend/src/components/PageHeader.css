@@ -465,6 +465,12 @@
   border-radius: 10px; font-size: 0.82rem; font-weight: 700;
 }
 
+/* Hide sidebar when modal is open */
+body.ph-modal-open .sidebar,
+body.ph-modal-open .sidebar-hamburger {
+  display: none !important;
+}
+
 /* Modal backdrop */
 .ph-modal-backdrop {
   position: fixed; 
