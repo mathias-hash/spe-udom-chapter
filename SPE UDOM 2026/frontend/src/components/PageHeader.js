@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { login as apiLogin, api, API_BASE_URL } from '../utils/api';
 import logo from '../assets/spe-udom-logo.png';
+import TopBanner from './TopBanner';
 import './PageHeader.css';
 
 const DropdownIcon = ({ children }) => (
@@ -264,6 +265,7 @@ const PageHeader = () => {
 
   return (
     <>
+      <TopBanner />
       <div className="page-header">
         <img src={logo} alt="SPE UDOM" className="page-header-logo" />
         <div className="page-header-text">
