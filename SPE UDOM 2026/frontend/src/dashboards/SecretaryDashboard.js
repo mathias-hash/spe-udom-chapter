@@ -1,11 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { FiTrash2, FiAlertTriangle } from 'react-icons/fi';
 import DashboardLayout from './components/DashboardLayout';
+import ProfileExperience from './components/ProfileExperience';
 import Toast from '../components/Toast';
 import Spinner from '../components/Spinner';
 import ElectionAnalytics from '../components/ElectionAnalytics';
+import Contact from '../pages/Contact';
+import { useAuth } from '../context/AuthContext';
 import { api, apiList, API_BASE } from '../utils/api';
-import ChatHistory from '../pages/ChatHistory';
+
+// ── Shared Confirm Modal ──────────────────────────────────────
+const ConfirmModal = ({ title, message, onConfirm, onCancel }) => (
+  <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+    <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: '100%', maxWidth: 380, boxShadow: '0 12px 40px rgba(0,0,0,0.2)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+        <span style={{ background: '#fef2f2', borderRadius: 10, padding: 10, display: 'flex' }}>
+          <FiAlertTriangle size={22} color="#dc2626" />
+        </span>
+        <h3 style={{ margin: 0, color: '#1a1a2e', fontSize: '1rem' }}>{title}</h3>
+      </div>
+      <p style={{ color: '#555', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: 22 }}>{message}</p>
+      <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+        <button onClick={onCancel} style={{ padding: '9px 20px', borderRadius: 8, border: '1.5px solid #dde3f0', background: '#fff', color: '#555', fontWeight: 600, cursor: 'pointer', fontSize: '0.88rem' }}>Cancel</button>
+        <button onClick={onConfirm} style={{ padding: '9px 20px', borderRadius: 8, border: 'none', background: '#dc2626', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: '0.88rem', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <FiTrash2 size={14} /> Delete
+        </button>
+      </div>
+    </div>
+  </div>
+);
 
 const StatCard = ({ label, value }) => (
   <div className="stat-card"><div className="stat-value">{value ?? '...'}</div><div className="stat-label">{label}</div></div>
@@ -26,7 +50,13 @@ const SecretaryOverview = () => {
   if (loading) return <Spinner />;
   return (
     <>
-      <h2 style={{ marginBottom: 20, color: '#333' }}>General Secretary Dashboard</h2>
+      <div style={{ background: '#0055b3', borderRadius: 12, padding: '20px 28px', marginBottom: 24 }}>
+        <h2 style={{ margin: 0, color: '#fff', fontFamily: '"Times New Roman", Times, serif', fontWeight: 800 }}>General Secretary Dashboard</h2>
+        <p style={{ color: '#fff', margin: '8px 0 0', fontFamily: '"Times New Roman", Times, serif', lineHeight: 1.7, opacity: 0.93 }}>
+          This overview keeps your election, publication, and reporting responsibilities in one place,
+          making it easier to coordinate records, maintain transparency, and keep chapter information current.
+        </p>
+      </div>
       <div className="stat-grid">
         <StatCard label="Total Elections" value={stats.total_elections} />
         <StatCard label="Open Elections" value={stats.open_elections} />
@@ -489,6 +519,7 @@ const ManageLeadership = () => {
   const submit = async e => {
     e.preventDefault();
     const fd = new FormData();
+    
     fd.append('name', form.name);
     fd.append('position', form.position);
     fd.append('year', activeYear);
@@ -771,10 +802,10 @@ const Publications = () => {
                   <td>{p.published_by_name}</td>
                   <td>{new Date(p.created_at).toLocaleDateString()}</td>
                   <td>
-                    {p.file
+                    {p.file_url
                       ? <div style={{ display: 'flex', gap: 4 }}>
-                          <button className="btn btn-sm" style={{ background: '#0066cc', color: '#fff' }} onClick={() => openFile(p.file)}>Open</button>
-                          <button className="btn btn-sm" style={{ background: '#198754', color: '#fff' }} onClick={() => downloadFile(p.file, p.title)}>Download</button>
+                          <button className="btn btn-sm" style={{ background: '#0066cc', color: '#fff' }} onClick={() => openFile(p.file_url)}>Open</button>
+                          <button className="btn btn-sm" style={{ background: '#198754', color: '#fff' }} onClick={() => downloadFile(p.file_url, p.title)}>Download</button>
                         </div>
                       : <span style={{ color: '#aaa', fontSize: '0.8rem' }}>No file</span>}
                   </td>
@@ -1129,6 +1160,124 @@ const MembershipSection = ({ report, onSave }) => {
 };
 
 // ── Secretary Dashboard ───────────────────────────────────────
+const Profile = () => {
+  const { user, updateUser } = useAuth();
+  const [form, setForm] = useState({ full_name: user?.full_name || '', phone: user?.phone || '', year_of_study: user?.year_of_study || '' });
+  const [toast, setToast] = useState(null);
+  const [pwForm, setPwForm] = useState({ current_password: '', new_password: '', confirm_password: '' });
+  const [pwErrors, setPwErrors] = useState({});
+  const [pwLoading, setPwLoading] = useState(false);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    const { ok, data } = await api('/auth/profile/', { method: 'PATCH', body: JSON.stringify(form) });
+    if (ok) {
+      updateUser(data);
+      setToast({ message: 'Profile updated successfully!', type: 'success' });
+    } else {
+      setToast({ message: 'Failed to update profile.', type: 'error' });
+    }
+  };
+
+  const changePassword = async (e) => {
+    e.preventDefault();
+    setPwErrors({});
+    setPwLoading(true);
+    const { ok, data } = await api('/auth/change-password/', { method: 'POST', body: JSON.stringify(pwForm) });
+    if (ok) {
+      setToast({ message: data.message, type: 'success' });
+      setPwForm({ current_password: '', new_password: '', confirm_password: '' });
+    } else {
+      setPwErrors(data);
+      setToast({ message: 'Failed to change password.', type: 'error' });
+    }
+    setPwLoading(false);
+  };
+
+  return (
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      <h2 style={{ marginBottom: 24, color: '#333' }}>My Profile</h2>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 20, background: '#fff', borderRadius: 12, padding: 24, marginBottom: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', border: '1px solid #eef2ff' }}>
+        <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg,#0f766e,#0284c7)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '1.8rem', fontWeight: 800, flexShrink: 0 }}>
+          {user?.full_name?.charAt(0).toUpperCase()}
+        </div>
+        <div>
+          <h3 style={{ color: '#1a1a2e', marginBottom: 4 }}>{user?.full_name}</h3>
+          <p style={{ color: '#666', fontSize: '0.9rem' }}>{user?.email}</p>
+          <span style={{ background: '#ccfbf1', color: '#115e59', padding: '2px 12px', borderRadius: 20, fontSize: '0.78rem', fontWeight: 700 }}>GENERAL SECRETARY</span>
+        </div>
+      </div>
+
+      <ProfileExperience user={user} roleLabel="General Secretary" accent="teal" />
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
+        <div className="dash-form" id="profile-edit-section">
+          <h3>Update Information</h3>
+          <form onSubmit={submit}>
+            <div className="form-group"><label>Email (cannot change)</label><input value={user?.email || ''} disabled style={{ background: '#f5f5f5' }} /></div>
+            <div className="form-group"><label>Full Name</label><input value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} required /></div>
+            <div className="form-group"><label>Phone</label><input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="+255 ..." /></div>
+            <div className="form-group">
+              <label>Year of Study</label>
+              <select value={form.year_of_study} onChange={e => setForm({ ...form, year_of_study: e.target.value })}>
+                <option value="">Select year</option>
+                {[1, 2, 3, 4].map(y => <option key={y} value={y}>Year {y}</option>)}
+              </select>
+            </div>
+            <button className="btn btn-primary" type="submit">Save Changes</button>
+          </form>
+        </div>
+
+        <div className="dash-form">
+          <h3>Account Details</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {[
+              { label: 'Role', value: 'General Secretary' },
+              { label: 'Email', value: user?.email },
+              { label: 'Phone', value: user?.phone || 'Not set' },
+              { label: 'Year of Study', value: user?.year_of_study ? `Year ${user.year_of_study}` : 'Not set' },
+              { label: 'Member Since', value: user?.date_joined ? new Date(user.date_joined).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '-' },
+            ].map(item => (
+              <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #f0f0f0' }}>
+                <span style={{ color: '#888', fontSize: '0.88rem' }}>{item.label}</span>
+                <span style={{ color: '#1a1a2e', fontWeight: 600, fontSize: '0.88rem' }}>{item.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="dash-form" id="profile-security-section" style={{ maxWidth: '100%' }}>
+        <h3>Change Password</h3>
+        <form onSubmit={changePassword}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+            <div className="form-group">
+              <label>Current Password</label>
+              <input type="password" value={pwForm.current_password} onChange={e => setPwForm({ ...pwForm, current_password: e.target.value })} placeholder="Current password" required />
+              {pwErrors.current_password && <span style={{ color: '#dc3545', fontSize: '0.82rem' }}>{pwErrors.current_password}</span>}
+            </div>
+            <div className="form-group">
+              <label>New Password</label>
+              <input type="password" value={pwForm.new_password} onChange={e => setPwForm({ ...pwForm, new_password: e.target.value })} placeholder="Min 6 characters" required />
+              {pwErrors.new_password && <span style={{ color: '#dc3545', fontSize: '0.82rem' }}>{pwErrors.new_password}</span>}
+            </div>
+            <div className="form-group">
+              <label>Confirm New Password</label>
+              <input type="password" value={pwForm.confirm_password} onChange={e => setPwForm({ ...pwForm, confirm_password: e.target.value })} placeholder="Repeat new password" required />
+              {pwErrors.confirm_password && <span style={{ color: '#dc3545', fontSize: '0.82rem' }}>{pwErrors.confirm_password}</span>}
+            </div>
+          </div>
+          <button className="btn btn-primary" type="submit" disabled={pwLoading} style={{ marginTop: 8 }}>
+            {pwLoading ? 'Changing...' : 'Change Password'}
+          </button>
+        </form>
+      </div>
+    </>
+  );
+};
+
 const SecretaryDashboard = () => (
   <DashboardLayout>
     <Routes>
@@ -1141,7 +1290,8 @@ const SecretaryDashboard = () => (
       <Route path="/records" element={<Publications />} />
       <Route path="/leadership" element={<ManageLeadership />} />
       <Route path="/annual-report" element={<AnnualReport />} />
-      <Route path="/chat-history" element={<ChatHistory />} />
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/contact" element={<Contact />} />
     </Routes>
   </DashboardLayout>
 );

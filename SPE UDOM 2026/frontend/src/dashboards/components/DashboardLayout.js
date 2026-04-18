@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import logo from '../../assets/spe-udom-logo.png';
+import Toast from '../../components/Toast';
 import SiteFooter from '../../components/SiteFooter';
 import TopBanner from '../../components/TopBanner';
+import PageHeader from '../../components/PageHeader';
 import './DashboardLayout.css';
 
 const menuByRole = {
   admin: [
     { path: '/dashboard', label: 'Overview' },
     { path: '/dashboard/users', label: 'Manage Users' },
+    { path: '/dashboard/online-users', label: '🟢 Online Users' },
     { path: '/dashboard/events', label: 'Manage Events' },
     { path: '/dashboard/announcements', label: 'Announcements' },
     { path: '/dashboard/publications', label: 'Publications' },
@@ -19,7 +21,7 @@ const menuByRole = {
     { path: '/dashboard/leadership', label: 'Leadership' },
     { path: '/dashboard/annual-report', label: 'Annual Report' },
     { path: '/dashboard/profile', label: 'Profile' },
-    { path: '/contact', label: 'Contact' },
+    { path: '/dashboard/contact', label: 'Contact' },
   ],
   president: [
     { path: '/dashboard', label: 'Overview' },
@@ -30,7 +32,7 @@ const menuByRole = {
     { path: '/dashboard/suggestions', label: 'Suggestions' },
     { path: '/dashboard/leadership', label: 'Leadership' },
     { path: '/dashboard/reports', label: 'Reports' },
-    { path: '/contact', label: 'Contact' },
+    { path: '/dashboard/contact', label: 'Contact' },
   ],
   general_secretary: [
     { path: '/dashboard', label: 'Overview' },
@@ -42,19 +44,18 @@ const menuByRole = {
     { path: '/dashboard/leadership', label: 'Leadership' },
     { path: '/dashboard/annual-report', label: 'Annual Report' },
     { path: '/dashboard/records', label: 'Records' },
-    { path: '/contact', label: 'Contact' },
+    { path: '/dashboard/contact', label: 'Contact' },
   ],
   member: [
     { path: '/dashboard', label: 'Overview' },
     { path: '/dashboard/events', label: 'Events' },
-    { path: '/dashboard/my-events', label: 'My Registrations' },
     { path: '/dashboard/publications', label: 'Publications' },
     { path: '/dashboard/annual-report', label: 'Annual Report' },
     { path: '/dashboard/leadership', label: 'Leadership' },
     { path: '/dashboard/elections', label: 'Vote' },
     { path: '/dashboard/profile', label: 'Profile' },
     { path: '/dashboard/suggestions', label: 'Suggestions' },
-    { path: '/contact', label: 'Contact' },
+    { path: '/dashboard/contact', label: 'Contact' },
   ],
 };
 
@@ -62,35 +63,56 @@ const DashboardLayout = ({ children }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(() => (
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  ));
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    // On mobile, sidebar starts closed
+    // On desktop, sidebar starts open
+    return typeof window !== 'undefined' ? window.innerWidth >= 768 : true;
+  });
+  const [toast, setToast] = useState(null);
 
   const menu = menuByRole[user?.role] || menuByRole.member;
 
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      setSidebarOpen(!mobile);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    setToast({ message: `Goodbye ${user?.full_name}! See you next time.`, type: 'success' });
+    setTimeout(() => navigate('/login'), 1200);
   };
 
   return (
     <div className="dash-wrapper">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <TopBanner />
+      <PageHeader />
+      <div className={`dash-sidebar-overlay ${sidebarOpen && isMobile ? 'active' : ''}`} onClick={() => setSidebarOpen(false)} />
       <aside className={`dash-sidebar ${sidebarOpen ? '' : 'closed'}`}>
-        <div className="dash-logo">
-          <img src={logo} alt="SPE UDOM" className="dash-logo-image" />
-          <div className="dash-logo-divider" />
-          <div className="dash-logo-text">
-            <span className="dash-logo-title">SPE UDOM</span>
-            <span className="dash-logo-sub">Student Chapter</span>
-          </div>
-        </div>
         <div className="dash-role-badge">{user?.role?.replace('_', ' ').toUpperCase()}</div>
-        <nav className="dash-nav">
+        <nav className="dash-nav" id="dashboard-navigation">
           {menu.map(({ path, label }) => (
             <Link
               key={path}
               to={path}
               className={`dash-link ${location.pathname === path ? 'active' : ''}`}
-              onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
+              onClick={() => isMobile && setSidebarOpen(false)}
             >
               {label}
             </Link>
@@ -99,10 +121,19 @@ const DashboardLayout = ({ children }) => {
         <button className="dash-logout" onClick={handleLogout}>Logout</button>
       </aside>
 
-      <div className={`dash-main ${sidebarOpen ? '' : 'expanded'}`}>
+      <div className={`dash-main ${sidebarOpen ? '' : 'expanded'} ${isMobile ? 'mobile' : ''}`}>
         <header className="dash-topbar">
-          <button className="dash-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
-            {sidebarOpen ? 'X' : '='}
+          <button 
+            className={`dash-toggle ${sidebarOpen ? 'open' : ''}`}
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            title={sidebarOpen ? 'Close menu' : 'Open menu'}
+            aria-label={sidebarOpen ? 'Close dashboard menu' : 'Open dashboard menu'}
+            aria-expanded={sidebarOpen}
+            aria-controls="dashboard-navigation"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
           </button>
         </header>
         <main className="dash-content">{children}</main>

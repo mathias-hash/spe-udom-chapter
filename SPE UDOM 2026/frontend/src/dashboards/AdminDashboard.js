@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import DashboardLayout from './components/DashboardLayout';
+import ProfileExperience from './components/ProfileExperience';
 import AnnualReportPage from './components/AnnualReportPage';
-import ChatHistory from '../pages/ChatHistory';
 import Toast from '../components/Toast';
 import Spinner from '../components/Spinner';
 import ElectionAnalytics from '../components/ElectionAnalytics';
 import Leadership from '../pages/Leadership';
+import Contact from '../pages/Contact';
 import { useAuth } from '../context/AuthContext';
 import { api, apiList } from '../utils/api';
 
@@ -25,7 +26,13 @@ const AdminOverview = () => {
   if (loading) return <Spinner />;
   return (
     <>
-      <h2 style={{ marginBottom: 20, color: '#333' }}>Admin Dashboard</h2>
+      <div style={{ background: '#0055b3', borderRadius: 12, padding: '20px 28px', marginBottom: 24 }}>
+        <h2 style={{ margin: 0, color: '#fff', fontFamily: '"Times New Roman", Times, serif', fontWeight: 800 }}>Admin Dashboard</h2>
+        <p style={{ color: '#fff', margin: '8px 0 0', fontFamily: '"Times New Roman", Times, serif', lineHeight: 1.7, opacity: 0.93 }}>
+          This overview brings together the chapter&apos;s key administration signals so you can monitor operations,
+          review activity quickly, and move directly to the tools that need your attention.
+        </p>
+      </div>
       <div className="stat-grid">
         <StatCard label="Total Members" value={stats.total_members} />
         <StatCard label="Total Events" value={stats.total_events} />
@@ -182,9 +189,21 @@ const ManageUsers = () => {
               </div>
               {!editUser && (
                 <>
+                  <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                    <label>Password Requirements *</label>
+                    <div style={{ background: '#f8f9fa', border: '1px solid #e9ecef', borderRadius: 6, padding: 12, marginBottom: 8, fontSize: '0.9rem', color: '#495057' }}>
+                      <ul style={{ margin: '0 0 0 18px', padding: 0 }}>
+                        <li>Minimum 6 characters</li>
+                        <li>Cannot be all numbers (e.g., "123456")</li>
+                        <li>Cannot be common words (e.g., "password", "admin", "12345678")</li>
+                        <li>Should not contain user's name or email</li>
+                      </ul>
+                      <p style={{ margin: '8px 0 0 0', fontStyle: 'italic', color: '#6c757d' }}>💡 Example: SPEUdom@2026, Manager123!, Ch@pter2026</p>
+                    </div>
+                  </div>
                   <div className="form-group">
                     <label>Password *</label>
-                    <input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="Min 6 characters" required />
+                    <input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="Enter secure password" required />
                     {formErrors.password && <span style={{ color: '#dc3545', fontSize: '0.82rem' }}>{formErrors.password}</span>}
                   </div>
                   <div className="form-group">
@@ -380,6 +399,18 @@ const Announcements = () => {
     else setToast({ message: 'Failed to send.', type: 'error' });
   };
 
+  const deleteAnnouncement = async (id) => {
+    if (window.confirm('Are you sure you want to delete this announcement?')) {
+      const { ok } = await api(`/announcements/${id}/`, { method: 'DELETE' });
+      if (ok) {
+        setList(list.filter(a => a.id !== id));
+        setToast({ message: 'Announcement deleted successfully!', type: 'success' });
+      } else {
+        setToast({ message: 'Failed to delete announcement.', type: 'error' });
+      }
+    }
+  };
+
   return (
     <>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
@@ -395,13 +426,16 @@ const Announcements = () => {
         <h3>Announcements</h3>
         {loading ? <Spinner /> : (
           <table>
-            <thead><tr><th>Title</th><th>Message</th><th>Sent By</th><th>Date</th></tr></thead>
+            <thead><tr><th>Title</th><th>Message</th><th>Sent By</th><th>Date</th><th>Actions</th></tr></thead>
             <tbody>
-              {list.length === 0 && <tr><td colSpan={4} style={{ textAlign: 'center', color: '#888' }}>No announcements yet</td></tr>}
+              {list.length === 0 && <tr><td colSpan={5} style={{ textAlign: 'center', color: '#888' }}>No announcements yet</td></tr>}
               {list.map(a => (
                 <tr key={a.id}>
                   <td>{a.title}</td><td>{a.message.substring(0, 60)}...</td>
                   <td>{a.sent_by_name}</td><td>{new Date(a.created_at).toLocaleDateString()}</td>
+                  <td>
+                    <button className="btn btn-danger btn-sm" onClick={() => deleteAnnouncement(a.id)}>Delete</button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -504,7 +538,11 @@ const AdminPublications = () => {
   const [loading, setLoading] = useState(true);
   useEffect(() => { apiList('/publications/').then(d => { setList(d); setLoading(false); }); }, []);
 
-  const resolveUrl = (url) => url.startsWith('http') ? url : `${window.location.origin.replace(':3000', ':8000')}${url}`;
+  const resolveUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${window.location.origin.replace(':3000', ':8000')}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
 
   const openFile = (url) => window.open(resolveUrl(url), '_blank', 'noopener,noreferrer');
 
@@ -535,10 +573,10 @@ const AdminPublications = () => {
                 <td>{p.published_by_name}</td>
                 <td>{new Date(p.created_at).toLocaleDateString()}</td>
                 <td>
-                  {p.file
+                  {p.file_url
                     ? <div style={{ display: 'flex', gap: 4 }}>
-                        <button className="btn btn-sm" style={{ background: '#0066cc', color: '#fff' }} onClick={() => openFile(p.file)}>Open</button>
-                        <button className="btn btn-sm" style={{ background: '#198754', color: '#fff' }} onClick={() => downloadFile(p.file, p.title)}>Download</button>
+                        <button className="btn btn-sm" style={{ background: '#0066cc', color: '#fff' }} onClick={() => openFile(p.file_url)}>Open</button>
+                        <button className="btn btn-sm" style={{ background: '#198754', color: '#fff' }} onClick={() => downloadFile(p.file_url, p.title)}>Download</button>
                       </div>
                     : <span style={{ color: '#aaa', fontSize: '0.8rem' }}>No file</span>}
                 </td>
@@ -548,6 +586,180 @@ const AdminPublications = () => {
         </table>
       )}
     </div>
+  );
+};
+
+// Online Users Monitoring
+const OnlineUsers = () => {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all'); // 'all', 'online', 'offline'
+  const [autoRefresh, setAutoRefresh] = useState(true);
+
+  const loadUsers = React.useCallback(() => {
+    apiList('/users/').then(d => {
+      setUsers(Array.isArray(d) ? d : (d.results || []));
+      setLoading(false);
+    });
+  }, []);
+
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
+
+  // Auto-refresh every 30 seconds if enabled
+  useEffect(() => {
+    if (!autoRefresh) return;
+    const interval = setInterval(loadUsers, 30000);
+    return () => clearInterval(interval);
+  }, [autoRefresh, loadUsers]);
+
+  const isOnline = (lastLogin) => {
+    if (!lastLogin) return false;
+    const lastLoginTime = new Date(lastLogin).getTime();
+    const currentTime = new Date().getTime();
+    const diffMinutes = (currentTime - lastLoginTime) / (1000 * 60);
+    return diffMinutes < 30; // Online if logged in within last 30 minutes
+  };
+
+  const formatTime = (date) => {
+    if (!date) return 'Never';
+    return new Date(date).toLocaleString();
+  };
+
+  const filtered = users.filter(u => {
+    if (filter === 'online') return isOnline(u.last_login);
+    if (filter === 'offline') return !isOnline(u.last_login);
+    return true;
+  });
+
+  const onlineCount = users.filter(u => isOnline(u.last_login)).length;
+
+  return (
+    <>
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <h3>User Activity Monitor</h3>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.9rem', cursor: 'pointer' }}>
+              <input type="checkbox" checked={autoRefresh} onChange={e => setAutoRefresh(e.target.checked)} />
+              Auto-refresh (30s)
+            </label>
+            <button className="btn btn-primary btn-sm" onClick={loadUsers}>🔄 Refresh Now</button>
+          </div>
+        </div>
+
+        {/* Quick Stats */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 20 }}>
+          <div style={{ background: '#e7f3ff', border: '1px solid #b3d9ff', borderRadius: 10, padding: 16 }}>
+            <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0055b3' }}>{onlineCount}</div>
+            <div style={{ fontSize: '0.88rem', color: '#0055b3', fontWeight: 600 }}>Users Online Now</div>
+          </div>
+          <div style={{ background: '#f0f0f0', border: '1px solid #ddd', borderRadius: 10, padding: 16 }}>
+            <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#666' }}>{users.length - onlineCount}</div>
+            <div style={{ fontSize: '0.88rem', color: '#666', fontWeight: 600 }}>Users Offline</div>
+          </div>
+          <div style={{ background: '#fff3cd', border: '1px solid #ffc107', borderRadius: 10, padding: 16 }}>
+            <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#856404' }}>{users.length}</div>
+            <div style={{ fontSize: '0.88rem', color: '#856404', fontWeight: 600 }}>Total Members</div>
+          </div>
+        </div>
+
+        {/* Filter Buttons */}
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+          <button 
+            className={`btn btn-sm ${filter === 'all' ? 'btn-primary' : ''}`} 
+            onClick={() => setFilter('all')}
+            style={filter !== 'all' ? { background: '#f0f0f0' } : {}}
+          >
+            All Users
+          </button>
+          <button 
+            className={`btn btn-sm ${filter === 'online' ? 'btn-primary' : ''}`} 
+            onClick={() => setFilter('online')}
+            style={filter !== 'online' ? { background: '#f0f0f0' } : {}}
+          >
+            🟢 Online ({onlineCount})
+          </button>
+          <button 
+            className={`btn btn-sm ${filter === 'offline' ? 'btn-primary' : ''}`} 
+            onClick={() => setFilter('offline')}
+            style={filter !== 'offline' ? { background: '#f0f0f0' } : {}}
+          >
+            ⚫ Offline ({users.length - onlineCount})
+          </button>
+        </div>
+      </div>
+
+      {/* Users Table */}
+      <div className="dash-table-wrap">
+        <h3 style={{ marginBottom: 16 }}>Activity Details</h3>
+        {loading ? <Spinner /> : (
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Last Login</th>
+                <th>Last Login Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: 'center', color: '#888' }}>
+                    No users found
+                  </td>
+                </tr>
+              )}
+              {filtered.map(u => {
+                const online = isOnline(u.last_login);
+                return (
+                  <tr key={u.id}>
+                    <td><strong>{u.full_name}</strong></td>
+                    <td>{u.email}</td>
+                    <td>
+                      <span style={{
+                        padding: '2px 10px',
+                        borderRadius: 6,
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        background: roleBadgeColor[u.role],
+                        color: roleTextColor[u.role]
+                      }}>
+                        {u.role?.replace(/_/g, ' ').toUpperCase()}
+                      </span>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <div style={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: '50%',
+                          background: online ? '#22c55e' : '#cbd5e1',
+                          boxShadow: online ? '0 0 8px rgba(34,197,94,0.5)' : 'none'
+                        }} />
+                        <span style={{ fontWeight: 600, color: online ? '#22c55e' : '#999' }}>
+                          {online ? 'Online' : 'Offline'}
+                        </span>
+                      </div>
+                    </td>
+                    <td>
+                      {u.last_login ? new Date(u.last_login).toLocaleDateString() : 'Never logged in'}
+                    </td>
+                    <td style={{ fontSize: '0.85rem', color: '#666' }}>
+                      {formatTime(u.last_login)}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </>
   );
 };
 
@@ -603,9 +815,11 @@ const Profile = () => {
         </div>
       </div>
 
+      <ProfileExperience user={user} roleLabel="Administrator" accent="rose" />
+
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
         {/* Update Info */}
-        <div className="dash-form">
+        <div className="dash-form" id="profile-edit-section">
           <h3>Update Information</h3>
           <form onSubmit={updateProfile}>
             <div className="form-group"><label>Email (cannot change)</label><input value={user?.email} disabled style={{ background: '#f5f5f5' }} /></div>
@@ -643,7 +857,7 @@ const Profile = () => {
       </div>
 
       {/* Change Password */}
-      <div className="dash-form" style={{ maxWidth: '100%' }}>
+      <div className="dash-form" id="profile-security-section" style={{ maxWidth: '100%' }}>
         <h3>Change Password</h3>
         <form onSubmit={changePassword}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
@@ -677,6 +891,7 @@ const AdminDashboard = () => (
     <Routes>
       <Route path="/" element={<AdminOverview />} />
       <Route path="/users" element={<ManageUsers />} />
+      <Route path="/online-users" element={<OnlineUsers />} />
       <Route path="/events" element={<ManageEvents />} />
       <Route path="/announcements" element={<Announcements />} />
       <Route path="/suggestions" element={<Suggestions />} />
@@ -684,8 +899,8 @@ const AdminDashboard = () => (
       <Route path="/analytics" element={<ElectionAnalytics />} />
       <Route path="/leadership" element={<Leadership />} />
       <Route path="/annual-report" element={<AnnualReportPage title="Annual Report" />} />
-      <Route path="/chat-history" element={<ChatHistory />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/contact" element={<Contact />} />
     </Routes>
   </DashboardLayout>
 );

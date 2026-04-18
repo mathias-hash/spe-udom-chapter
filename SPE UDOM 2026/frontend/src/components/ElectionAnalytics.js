@@ -3,7 +3,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell, LabelList
 } from 'recharts';
-import { apiList } from '../utils/api';
+import { API_BASE, apiList } from '../utils/api';
 
 const COLORS = ['#0055b3','#0099ff','#00c49f','#ff8042','#a855f7','#f59e0b','#ef4444','#10b981'];
 
@@ -65,24 +65,33 @@ const ElectionAnalytics = () => {
   const [selectedId, setSelectedId] = useState('');
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
+  const selectedElection = elections.find(e => String(e.id) === selectedId);
+  const canShowResults = selectedElection?.status === 'closed';
 
   useEffect(() => {
     apiList('/elections/').then(list => {
       setElections(list);
-      // Auto-select first closed or open election
-      const auto = list.find(e => e.status === 'closed') || list.find(e => e.status === 'open') || list[0];
+      const auto = list.find(e => e.status === 'closed') || list[0];
       if (auto) setSelectedId(String(auto.id));
     });
   }, []);
 
   useEffect(() => {
     if (!selectedId) return;
+    if (!canShowResults) {
+      setResults(null);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
-    fetch(`http://localhost:8000/api/public/election/${selectedId}/results/`)
-      .then(r => r.json())
+    fetch(`${API_BASE}/public/election/${selectedId}/results/`)
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
       .then(d => { setResults(d); setLoading(false); })
       .catch(() => setLoading(false));
-  }, [selectedId]);
+  }, [selectedId, canShowResults]);
 
   // Group results by position
   const grouped = {};
@@ -114,11 +123,15 @@ const ElectionAnalytics = () => {
 
       {loading && <p style={{ color: '#888', textAlign: 'center', padding: 20 }}>Loading analytics...</p>}
 
-      {!loading && selectedId && Object.keys(grouped).length === 0 && (
+      {!loading && selectedId && !canShowResults && (
+        <p style={{ color: '#888', textAlign: 'center', padding: 20 }}>Results become available after the election is closed.</p>
+      )}
+
+      {!loading && selectedId && canShowResults && Object.keys(grouped).length === 0 && (
         <p style={{ color: '#888', textAlign: 'center', padding: 20 }}>No vote data available for this election yet.</p>
       )}
 
-      {!loading && Object.entries(grouped).map(([position, candidates]) => (
+      {!loading && canShowResults && Object.entries(grouped).map(([position, candidates]) => (
         <PositionChart
           key={position}
           position={position}

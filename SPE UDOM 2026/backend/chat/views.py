@@ -1,7 +1,10 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+from rest_framework.decorators import permission_classes
 
-from .models import ChatRoom, MessageQuota
+from .assistant import get_assistant_response, SPE_ASSISTANT_NAME
+from .models import ChatRoom, Message, MessageQuota
 
 
 def serialize_message(message):
@@ -15,32 +18,47 @@ def serialize_message(message):
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def support_room(request):
     room, _ = ChatRoom.objects.get_or_create(
         slug='spe-support',
         defaults={'name': 'SPE Support'},
     )
+    messages = [serialize_message(m) for m in room.messages.order_by('created_at')[:100]]
+    return Response({'room_key': room.slug, 'messages': messages})
 
-    if request.user.is_authenticated:
-        display_name = request.user.full_name
-        sender_role = 'admin' if request.user.role == 'admin' else 'member'
-        
-        # Get user's quota info
-        quota, created = MessageQuota.objects.get_or_create(user=request.user)
-        quota_info = quota.get_quota_info()
-    else:
-        display_name = 'Guest User'
-        sender_role = 'guest'
-        quota_info = None
 
-    messages = [serialize_message(message) for message in room.messages.order_by('created_at')[:50]]
-    return Response(
-        {
-            'room_key': room.slug,
-            'room_name': room.name,
-            'display_name': display_name,
-            'sender_role': sender_role,
-            'messages': messages,
-            'quota': quota_info,
-        }
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def send_message(request):
+    content = (request.data.get('content') or '').strip()
+    if not content:
+        return Response({'error': 'Content is required.'}, status=400)
+    if len(content) > 2000:
+        return Response({'error': 'Message too long.'}, status=400)
+
+    room, _ = ChatRoom.objects.get_or_create(
+        slug='spe-support', defaults={'name': 'SPE Support'}
     )
+
+    user = request.user if request.user.is_authenticated else None
+    sender_name = (request.data.get('sender_name') or (user.full_name if user else 'Guest'))[:100]
+    sender_role = request.data.get('sender_role', 'guest')
+    if sender_role not in ('guest', 'member', 'admin'):
+        sender_role = 'guest'
+
+    user_msg = Message.objects.create(
+        room=room, sender=user,
+        sender_name=sender_name, sender_role=sender_role, content=content
+    )
+
+    assistant_text = get_assistant_response(content, sender_name=sender_name)
+    bot_msg = Message.objects.create(
+        room=room, sender=None,
+        sender_name=SPE_ASSISTANT_NAME, sender_role='admin', content=assistant_text
+    )
+
+    return Response({
+        'user_message': serialize_message(user_msg),
+        'assistant_message': serialize_message(bot_msg),
+    }, status=201)

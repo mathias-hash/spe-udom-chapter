@@ -4,6 +4,8 @@
  * Use this helper to troubleshoot JWT authentication problems
  */
 
+import { API_BASE_URL } from './api.js';
+
 // 1. Check if tokens are being stored
 export const debugTokenStorage = () => {
   const access = localStorage.getItem('spe_access');
@@ -42,7 +44,7 @@ export const debugLogin = async (email, password) => {
   console.log('=== Testing Login ===');
   
   try {
-    const response = await fetch('http://localhost:8000/api/auth/login/', {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -83,7 +85,7 @@ export const debugAuthenticatedRequest = async () => {
   }
   
   try {
-    const response = await fetch('http://localhost:8000/api/auth/profile/', {
+    const response = await fetch(`${API_BASE_URL}/api/auth/profile/`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -134,7 +136,7 @@ export const debugCORS = async () => {
   console.log('=== Testing CORS ===');
   
   try {
-    const response = await fetch('http://localhost:8000/', {
+    const response = await fetch(`${API_BASE_URL}/`, {
       method: 'OPTIONS',
       headers: {
         'Origin': window.location.origin,

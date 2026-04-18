@@ -25,6 +25,7 @@ from .models import (
     latest_available_academic_year, is_valid_academic_year_format, is_allowed_academic_year
 )
 from .security import log_security_event, sanitize_input, validate_pagination
+from .validators import validate_document_file, validate_image_file
 
 
 # ── Throttling ─────────────────────────────────────────────────
@@ -36,6 +37,16 @@ class StrictAnonThrottle(AnonRateThrottle):
 class NormalUserThrottle(UserRateThrottle):
     scope = 'normal_user'
     THROTTLE_RATES = {'normal_user': '500/hour'}
+
+
+class PublicReadThrottle(AnonRateThrottle):
+    scope = 'public_read'
+    THROTTLE_RATES = {'public_read': '200/hour'}
+
+
+class PublicWriteThrottle(AnonRateThrottle):
+    scope = 'public_write'
+    THROTTLE_RATES = {'public_write': '20/hour'}
 
 
 # ── Permissions ───────────────────────────────────────────────
@@ -74,6 +85,22 @@ def paginate(queryset, request, serializer_class, **kwargs):
         'page_size': page_size,
         'total_pages': (total + page_size - 1) // page_size,
     }
+
+
+def validate_uploaded_image(file_obj, field_name='image'):
+    try:
+        validate_image_file(file_obj)
+    except DjangoValidationError as exc:
+        return Response({field_name: exc.messages[0] if exc.messages else 'Invalid image upload'}, status=400)
+    return None
+
+
+def validate_uploaded_document(file_obj, field_name='file'):
+    try:
+        validate_document_file(file_obj)
+    except DjangoValidationError as exc:
+        return Response({field_name: exc.messages[0] if exc.messages else 'Invalid file upload'}, status=400)
+    return None
 
 
 # ── Auth ──────────────────────────────────────────────────────
@@ -131,8 +158,9 @@ def login(request):
     return Response(s.errors, status=400)
 
 
-@api_view(['GET', 'PATCH'])
+@api_view(['GET', 'PATCH', 'PUT'])
 @permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
 def profile(request):
     """Get or update user profile"""
     if request.method == 'GET':
@@ -298,6 +326,18 @@ def manage_user(request, pk):
 @api_view(['POST'])
 @permission_classes([IsAdmin])
 def create_user(request):
+    """Create a new user with proper password validation and error handling"""
+    # Validate required fields
+    required = ['email', 'full_name', 'password', 'confirm_password']
+    for field in required:
+        if not request.data.get(field):
+            return Response({field: [f'{field.replace("_", " ").title()} is required']}, status=400)
+    
+    # Validate passwords match
+    if request.data.get('password') != request.data.get('confirm_password'):
+        return Response({'confirm_password': ['Passwords do not match']}, status=400)
+    
+    # Use RegisterSerializer for validation (includes password strength check)
     s = RegisterSerializer(data=request.data)
     if s.is_valid():
         user = s.save()
@@ -305,7 +345,10 @@ def create_user(request):
         if role in dict(Student.ROLE_CHOICES):
             user.role = role
             user.save()
+            log_security_event('USER_CREATED', user=user, details=f'Created by admin: {request.user.email}, Role: {role}')
         return Response(StudentSerializer(user).data, status=201)
+    
+    # Return detailed validation errors to help admin understand what went wrong
     return Response(s.errors, status=400)
 
 
@@ -388,11 +431,14 @@ def event_photos(request, pk):
     photo = request.FILES.get('photo')
     if not photo:
         return Response({'error': 'Photo is required'}, status=400)
+    invalid_photo_response = validate_uploaded_image(photo, 'photo')
+    if invalid_photo_response:
+        return invalid_photo_response
     
     event_photo = EventPhoto.objects.create(
         event=event,
         photo=photo,
-        caption=request.data.get('caption', ''),
+        caption=sanitize_input(request.data.get('caption', ''), max_length=200),
         uploaded_by=request.user
     )
     return Response({
@@ -473,9 +519,25 @@ def announcements(request):
     return Response(s.errors, status=400)
 
 
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_announcement(request, pk):
+    try:
+        announcement = Announcement.objects.get(id=pk)
+    except Announcement.DoesNotExist:
+        return Response({'error': 'Announcement not found'}, status=404)
+    
+    # Check permissions - only admin/president can delete
+    if request.user.role not in ['admin', 'president']:
+        return Response({'error': 'Permission denied'}, status=403)
+    
+    log_security_event('ANNOUNCEMENT_DELETED', user=request.user, details=f'Announcement: {announcement.title}')
+    announcement.delete()
+    return Response({'message': 'Announcement deleted successfully'}, status=200)
+
+
 # ── Publications ──────────────────────────────────────────────
 @api_view(['GET', 'POST'])
-@permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser, FormParser, JSONParser])
 def publications(request):
     if request.method == 'GET':
@@ -484,8 +546,15 @@ def publications(request):
         if search:
             qs = qs.filter(title__icontains=search) | qs.filter(content__icontains=search)
         return Response(paginate(qs.order_by('-created_at'), request, PublicationSerializer))
+    if not request.user.is_authenticated:
+        return Response({'error': 'Authentication credentials were not provided'}, status=401)
     if request.user.role not in ['admin', 'general_secretary']:
         return Response({'error': 'Permission denied'}, status=403)
+    upload = request.FILES.get('file')
+    if upload:
+        invalid_file_response = validate_uploaded_document(upload, 'file')
+        if invalid_file_response:
+            return invalid_file_response
     s = PublicationSerializer(data=request.data)
     if s.is_valid():
         s.save(published_by=request.user)
@@ -559,7 +628,10 @@ def public_election(request):
     if not election:
         election = Election.objects.order_by('-created_at').first()
     if not election:
-        return Response({'error': 'No election found'}, status=404)
+        return Response({
+            'message': 'No election available yet',
+            'results': None,
+        })
     return Response(ElectionSerializer(election, context={'request': request}).data)
 
 
@@ -580,6 +652,11 @@ def add_candidate(request, election_id):
         election = Election.objects.get(pk=election_id)
     except Election.DoesNotExist:
         return Response({'error': 'Election not found'}, status=404)
+    photo = request.FILES.get('photo')
+    if photo:
+        invalid_photo_response = validate_uploaded_image(photo, 'photo')
+        if invalid_photo_response:
+            return invalid_photo_response
     s = CandidateSerializer(data=request.data, context={'request': request})
     if s.is_valid():
         s.save(election=election, approved=True)
@@ -756,6 +833,16 @@ def leadership_years(request):
     return JsonResponse({'years': available_academic_years()})
 
 
+@api_view(['DELETE'])
+@permission_classes([IsGeneralSecretary])
+def leadership_delete_year(request, year):
+    """Delete all leadership members for a given academic year."""
+    deleted, _ = LeadershipMember.objects.filter(year=year).delete()
+    if deleted == 0:
+        return Response({'error': 'No leadership records found for this year.'}, status=404)
+    return Response(status=204)
+
+
 @api_view(['POST'])
 @permission_classes([IsGeneralSecretary])
 def leadership_advance_year(request):
@@ -790,6 +877,10 @@ def leadership_create(request):
         return Response({'error': 'Year must be in format YYYY/YYYY and consecutive, e.g. 2025/2026.'}, status=400)
     if not is_allowed_academic_year(year):
         return Response({'error': 'Year must be between 2024/2025 and 2026/2027 unless a newer year has been advanced.'}, status=400)
+    if image:
+        invalid_image_response = validate_uploaded_image(image, 'image')
+        if invalid_image_response:
+            return invalid_image_response
     obj, _ = LeadershipMember.objects.update_or_create(
         position=position, year=year,
         defaults={'name': name, **(({'image': image}) if image else {})}
@@ -812,21 +903,25 @@ def leadership_detail(request, pk):
     if 'name' in request.data:
         obj.name = request.data['name']
     if 'image' in request.FILES:
+        invalid_image_response = validate_uploaded_image(request.FILES['image'], 'image')
+        if invalid_image_response:
+            return invalid_image_response
         obj.image = request.FILES['image']
     obj.save()
     return Response({'id': obj.id, 'name': obj.name, 'position': obj.position,
                      'image_url': request.build_absolute_uri(obj.image.url) if obj.image else ''})
 
 @api_view(['GET', 'POST'])
+@throttle_classes([PublicWriteThrottle])
 def contact(request):
     if request.method == 'GET':
         return Response({"page": "contact"})
 
     from .models import ContactMessage
-    name = request.data.get('name', '').strip()
-    email = request.data.get('email', '').strip()
-    subject = request.data.get('subject', '').strip() or 'SPE UDOM Contact Form'
-    message = request.data.get('message', '').strip()
+    name = sanitize_input(request.data.get('name', ''), max_length=100)
+    email = sanitize_input(request.data.get('email', ''), max_length=254).lower()
+    subject = sanitize_input(request.data.get('subject', ''), max_length=200) or 'SPE UDOM Contact Form'
+    message = sanitize_input(request.data.get('message', ''), max_length=5000)
 
     if not name or not email or not message:
         return Response({'error': 'Name, email, and message are required.'}, status=400)
@@ -855,7 +950,7 @@ def annual_report_list(request):
     return Response(list(reports))
 
 
-@api_view(['GET', 'POST'])
+@api_view(['GET', 'POST', 'DELETE'])
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser, FormParser, JSONParser])
 def annual_report_detail(request, year):
@@ -863,6 +958,16 @@ def annual_report_detail(request, year):
         return Response({'error': 'Year must be in format YYYY/YYYY and consecutive, e.g. 2025/2026.'}, status=400)
     if not is_allowed_academic_year(year):
         return Response({'error': 'Year must be between 2024/2025 and 2026/2027 unless a newer year has been advanced.'}, status=400)
+
+    if request.method == 'DELETE':
+        if request.user.role != 'general_secretary':
+            return Response({'error': 'Only the General Secretary can delete annual reports.'}, status=403)
+        try:
+            r = AnnualReport.objects.get(year=year)
+            r.delete()
+            return Response(status=204)
+        except AnnualReport.DoesNotExist:
+            return Response({'error': 'Report not found.'}, status=404)
     if request.method == 'GET':
         try:
             r = AnnualReport.objects.get(year=year)
@@ -903,10 +1008,16 @@ def annual_report_detail(request, year):
     ]
     for f in fields:
         if f in request.data:
-            setattr(r, f, request.data[f])
+            setattr(r, f, sanitize_input(request.data[f]))
     if 'president_image' in request.FILES:
+        invalid_image_response = validate_uploaded_image(request.FILES['president_image'], 'president_image')
+        if invalid_image_response:
+            return invalid_image_response
         r.president_image = request.FILES['president_image']
     if 'membership_chart' in request.FILES:
+        invalid_image_response = validate_uploaded_image(request.FILES['membership_chart'], 'membership_chart')
+        if invalid_image_response:
+            return invalid_image_response
         r.membership_chart = request.FILES['membership_chart']
     r.save()
     return Response({'id': r.id, 'year': r.year, 'updated_at': r.updated_at})
@@ -931,7 +1042,13 @@ def annual_report_upload_image(request, year, section):
     img_file = request.FILES.get('image')
     if not img_file:
         return Response({'error': 'image file required'}, status=400)
-    img = AnnualReportImage.objects.create(image=img_file, caption=request.data.get('caption', ''))
+    invalid_image_response = validate_uploaded_image(img_file, 'image')
+    if invalid_image_response:
+        return invalid_image_response
+    img = AnnualReportImage.objects.create(
+        image=img_file,
+        caption=sanitize_input(request.data.get('caption', ''), max_length=200)
+    )
     getattr(r, f'{section}_images').add(img)
     return Response({'id': img.id, 'url': request.build_absolute_uri(img.image.url), 'caption': img.caption}, status=201)
 
@@ -983,53 +1100,50 @@ def annual_report_financial(request, year):
         'outstanding_balance': str(item.outstanding_balance), 'balance': str(item.balance),
     })
 
+@api_view(['GET'])
+@permission_classes([])
+@throttle_classes([PublicReadThrottle])
 def public_events(request):
     qs = Event.objects.filter(status='approved').order_by('-date')
-    search = request.GET.get('search', '')
+    search = sanitize_input(request.GET.get('search', ''), max_length=200)
     date_after = request.GET.get('date_after')
     date_before = request.GET.get('date_before')
-    
+
     if search:
         qs = qs.filter(title__icontains=search) | qs.filter(location__icontains=search)
-    
     if date_after:
         qs = qs.filter(date__gte=date_after)
-    
     if date_before:
         qs = qs.filter(date__lt=date_before)
-    
-    # Pagination
-    page = int(request.GET.get('page', 1))
-    page_size = int(request.GET.get('page_size', 10))
+
+    page, page_size = validate_pagination(request.GET.get('page', 1), request.GET.get('page_size', 10))
     start = (page - 1) * page_size
-    end = start + page_size
-    
     total = qs.count()
-    events_page = qs[start:end]
-    
-    data = []
-    for e in events_page:
-        data.append({
-            'id': e.id,
-            'title': e.title,
-            'description': e.description,
-            'location': e.location,
-            'date': e.date.isoformat(),
-            'status': e.status,
-            'cancel_reason': e.cancel_reason or '',
-            'registration_count': e.registrations.count(),
-        })
-    
-    return JsonResponse({
+    events_page = qs[start:start + page_size]
+
+    data = [{
+        'id': e.id,
+        'title': e.title,
+        'description': e.description,
+        'location': e.location,
+        'date': e.date.isoformat(),
+        'status': e.status,
+        'cancel_reason': e.cancel_reason or '',
+        'registration_count': e.registrations.count(),
+    } for e in events_page]
+
+    return Response({
         'results': data,
         'count': total,
         'page': page,
         'page_size': page_size,
-        'total_pages': (total + page_size - 1) // page_size
+        'total_pages': (total + page_size - 1) // page_size,
     })
 
 
 @api_view(['GET'])
+@permission_classes([])
+@throttle_classes([PublicReadThrottle])
 def public_event_photos(request, pk):
     """Public endpoint to view photos of an approved event"""
     try:

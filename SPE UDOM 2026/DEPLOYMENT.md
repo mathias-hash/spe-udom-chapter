@@ -2,7 +2,7 @@
 
 ## Backend: Railway or Render
 
-Deploy the `backend` folder.
+Deploy the `SPE UDOM 2026/backend` folder.
 
 ### Environment variables
 
@@ -15,19 +15,20 @@ Deploy the `backend` folder.
 
 ### Render
 
-- Root directory: `backend`
+- Root directory: `SPE UDOM 2026/backend`
 - Build command: `./build.sh`
-- Start command: `gunicorn backend.wsgi:application`
-- Optional: use the included `backend/render.yaml`
+- Start command: `python manage.py migrate && gunicorn backend.wsgi:application`
+- Add `SPE UDOM 2026/backend/runtime.txt` with `python-3.13.3` so Render does not default to Python 3.14
+- Optional: use the included `SPE UDOM 2026/backend/render.yaml`
 
 ### Railway
 
-- Root directory: `backend`
+- Root directory: `SPE UDOM 2026/backend`
 - Build command: `pip install -r requirements.txt`
 - Start command: `gunicorn backend.wsgi:application`
 - Run once after first deploy: `python manage.py migrate`
 
-## Frontend: Netlify or Vercel
+## Frontend: Netlify, Vercel, or Render
 
 Deploy the `frontend` folder.
 
@@ -48,6 +49,13 @@ Deploy the `frontend` folder.
 - Framework preset: Create React App / React
 - Build command: `npm run build`
 - Output directory: `build`
+
+### Render
+
+- Static site root directory: `SPE UDOM 2026/frontend`
+- Build command: `npm install && npm run build`
+- Publish directory: `build`
+- Use the included [render.yaml](/c:/Users/musa kulwa/spe-udom-chapter/SPE UDOM 2026/frontend/render.yaml:1) so Render rewrites routes like `/leadership` to `index.html`
 
 ## Final wiring
 

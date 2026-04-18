@@ -10,6 +10,7 @@ import {
   FiImage,
   FiRefreshCw,
   FiStar,
+  FiTrash2,
   FiTrendingUp,
   FiUsers,
 } from 'react-icons/fi';
@@ -391,6 +392,21 @@ const AnnualReportPage = ({ canEdit = false, title = 'Annual Report' }) => {
     }
   };
 
+  const deleteYear = async () => {
+    if (!canEdit || !activeYear) return;
+    if (!window.confirm(`Permanently delete the entire report for ${activeYear}? This cannot be undone.`)) return;
+    const { ok, data } = await api(`/annual-reports/${encodeURIComponent(activeYear)}/`, { method: 'DELETE' });
+    if (ok) {
+      const remaining = years.filter(y => y !== activeYear);
+      setYears(remaining);
+      setActiveYear(remaining.length ? remaining[remaining.length - 1] : '');
+      syncReport(null);
+      setToast({ message: `Report for ${activeYear} deleted.`, type: 'success' });
+    } else {
+      setToast({ message: data?.error || 'Failed to delete year.', type: 'error' });
+    }
+  };
+
   const deleteFinancialRow = async (id) => {
     if (!canEdit) return;
     const { ok, data } = await api(`/annual-reports/${encodeURIComponent(activeYear)}/financial/`, {
@@ -420,7 +436,9 @@ const AnnualReportPage = ({ canEdit = false, title = 'Annual Report' }) => {
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <select
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <label style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b' }}>Select the year to View and download the annual report.</label>
+            <select
             value={activeYear}
             onChange={(e) => setActiveYear(e.target.value)}
             style={{ padding: '10px 14px', borderRadius: 8, border: '1.5px solid #cbd5e1', minWidth: 160, fontWeight: 700 }}
@@ -429,6 +447,7 @@ const AnnualReportPage = ({ canEdit = false, title = 'Annual Report' }) => {
               <option key={year} value={year}>{year}</option>
             ))}
           </select>
+          </div>
           <button
             type="button"
             style={{ ...toolbarButtonStyle, background: '#0f62c9', color: '#fff' }}
@@ -438,6 +457,16 @@ const AnnualReportPage = ({ canEdit = false, title = 'Annual Report' }) => {
             <FiDownload size={16} />
             Download
           </button>
+          {canEdit && activeYear && (
+            <button
+              type="button"
+              style={{ ...toolbarButtonStyle, background: '#dc2626', color: '#fff' }}
+              onClick={deleteYear}
+            >
+              <FiTrash2 size={16} />
+              Delete Year
+            </button>
+          )}
           {saving && (
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: '#0f62c9', fontWeight: 700, fontSize: '0.85rem' }}>
               <FiRefreshCw size={15} />

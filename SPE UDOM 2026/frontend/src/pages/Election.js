@@ -130,8 +130,8 @@ const Election = () => {
           <h1>SPE UDOM Elections 2026</h1>
           <h2>{election.title}</h2>
           <div className="election-meta">
-            <span className="election-status" style={{ background: statusColor[election.status] }}>
-              {election.status.toUpperCase()}
+            <span className="election-status" style={{ background: statusColor[election.status] || '#888' }}>
+              {(election.status || 'draft').toUpperCase()}
             </span>
             <span className="election-deadline">
               🗓 Voting Deadline: {new Date(election.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}

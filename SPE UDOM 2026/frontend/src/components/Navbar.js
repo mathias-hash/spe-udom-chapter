@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import logo from '../assets/spe-udom-logo.png';
 import TopBanner from './TopBanner';
 import './Navbar.css';
 
@@ -15,27 +14,40 @@ const navItems = [
   { path: '/election', label: 'Election' },
 ];
 
-const Navbar = () => {
+const Navbar = ({ showBanner = true }) => {
   const location = useLocation();
+  const [open, setOpen] = useState(false);
+
+  const close = () => setOpen(false);
 
   return (
     <>
-      <TopBanner />
-      <div className="sidebar">
-        <div className="sidebar-logo">
-          <img src={logo} alt="SPE UDOM" className="sidebar-logo-image" />
-          <div className="sidebar-logo-divider" />
-          <div className="sidebar-logo-text">
-            <span className="sidebar-logo-title">SPE UDOM</span>
-            <span className="sidebar-logo-sub">Student Chapter</span>
-          </div>
+      {showBanner && <TopBanner />}
+      <nav className="desktop-nav" aria-label="Desktop menu">
+        <div className="desktop-nav-inner">
+          {navItems.map(({ path, label }) => (
+            <Link
+              key={path}
+              to={path}
+              className={`desktop-nav-link ${location.pathname === path ? 'active' : ''}`}
+            >
+              {label}
+            </Link>
+          ))}
         </div>
+      </nav>
+      <button className="sidebar-hamburger" onClick={() => setOpen(o => !o)} aria-label="Toggle menu">
+        <span /><span /><span />
+      </button>
+      <div className={`sidebar-overlay${open ? ' active' : ''}`} onClick={close} />
+      <div className={`sidebar${open ? ' sidebar-open' : ''}`}>
         <ul className="sidebar-menu">
           {navItems.map(({ path, label }) => (
             <li key={path}>
               <Link
                 to={path}
                 className={`sidebar-link ${location.pathname === path ? 'active' : ''}`}
+                onClick={close}
               >
                 {label}
               </Link>

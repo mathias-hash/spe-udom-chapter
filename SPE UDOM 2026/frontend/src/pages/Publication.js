@@ -16,9 +16,7 @@ const Publication = () => {
   useEffect(() => {
     setLoading(true);
     const params = new URLSearchParams({ search: query, page, page_size: ITEMS_PER_PAGE });
-    fetch(`${API_BASE}/publications/?${params}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('spe_access')}` }
-    })
+    fetch(`${API_BASE}/publications/?${params}`)
       .then(r => r.json())
       .then(d => {
         if (Array.isArray(d)) { setPubs(d); setTotalPages(1); }
@@ -61,10 +59,11 @@ const Publication = () => {
                           <span>By {p.published_by_name}</span>
                           <span>{new Date(p.created_at).toLocaleDateString()}</span>
                         </div>
-                        {p.file && (
+                        {p.file_url && (
                           <a
-                            href={`${p.file.startsWith('http') ? p.file : API_BASE + p.file}`}
-                            download
+                            href={p.file_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="pub-download"
                           >
                             ⬇ Download

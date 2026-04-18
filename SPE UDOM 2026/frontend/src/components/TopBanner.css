@@ -13,6 +13,25 @@
   box-shadow: 0 2px 6px rgba(0, 85, 179, 0.12);
 }
 
+.top-banner-tagline {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #ffd700;
+  letter-spacing: 1.4px;
+  white-space: nowrap;
+  z-index: 1;
+  pointer-events: none;
+}
+
+
+/* Logo fixed in top-left across all pages */
+.topbar-logo {
+  display: none;
+}
+
 .top-banner-track {
   display: flex;
   white-space: nowrap;

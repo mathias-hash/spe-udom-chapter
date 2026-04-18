@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import DashboardLayout from './components/DashboardLayout';
+import ProfileExperience from './components/ProfileExperience';
 import AnnualReportPage from './components/AnnualReportPage';
 import Toast from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../utils/api';
 import Leadership from '../pages/Leadership';
-import ChatHistory from '../pages/ChatHistory';
+import Contact from '../pages/Contact';
 
 const extractList = (data) => Array.isArray(data) ? data : (data?.results || []);
 
@@ -20,7 +21,13 @@ const MemberOverview = () => {
   }, []);
   return (
     <>
-      <h2 style={{ marginBottom: 20, color: '#333' }}>Welcome, {user?.full_name}</h2>
+      <div style={{ background: '#0055b3', borderRadius: 12, padding: '20px 28px', marginBottom: 24 }}>
+        <h2 style={{ margin: 0, color: '#fff', fontFamily: '"Times New Roman", Times, serif', fontWeight: 800 }}>Welcome, {user?.full_name}</h2>
+        <p style={{ color: '#fff', margin: '8px 0 0', fontFamily: '"Times New Roman", Times, serif', lineHeight: 1.7, opacity: 0.93 }}>
+          Here is your member overview, where you can quickly follow chapter updates, track your activity,
+          and move smoothly to events, voting, publications, and support whenever you need them.
+        </p>
+      </div>
       <div className="stat-grid">
         <div className="stat-card"><div className="stat-value">{events.length}</div><div className="stat-label">Available Events</div></div>
         <div className="stat-card"><div className="stat-value">{events.filter(e => e.is_registered).length}</div><div className="stat-label">My Registrations</div></div>
@@ -108,7 +115,11 @@ const Publications = () => {
   const [list, setList] = useState([]);
   useEffect(() => { api('/publications/').then(r => setList(extractList(r.data))); }, []);
 
-  const resolveUrl = (url) => url.startsWith('http') ? url : `${window.location.origin.replace(':3000', ':8000')}${url}`;
+  const resolveUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${window.location.origin.replace(':3000', ':8000')}${url}`;
+  };
   const openFile = (url) => window.open(resolveUrl(url), '_blank', 'noopener,noreferrer');
   const downloadFile = async (url, title) => {
     try {
@@ -136,10 +147,10 @@ const Publications = () => {
               <td style={{ fontSize: '0.82rem', color: '#555' }}>{p.content?.substring(0, 60)}...</td>
               <td>{new Date(p.created_at).toLocaleDateString()}</td>
               <td>
-                {p.file
+                {p.file_url
                   ? <div style={{ display: 'flex', gap: 4 }}>
-                      <button className="btn btn-sm" style={{ background: '#0066cc', color: '#fff' }} onClick={() => openFile(p.file)}>Open</button>
-                      <button className="btn btn-sm" style={{ background: '#198754', color: '#fff' }} onClick={() => downloadFile(p.file, p.title)}>Download</button>
+                      <button className="btn btn-sm" style={{ background: '#0066cc', color: '#fff' }} onClick={() => openFile(p.file_url)}>Open</button>
+                      <button className="btn btn-sm" style={{ background: '#198754', color: '#fff' }} onClick={() => downloadFile(p.file_url, p.title)}>Download</button>
                     </div>
                   : <span style={{ color: '#aaa', fontSize: '0.8rem' }}>—</span>}
               </td>
@@ -336,8 +347,10 @@ const Profile = () => {
     <>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
+      <ProfileExperience user={user} roleLabel="Member" accent="blue" />
+
       {/* Update Profile */}
-      <div className="dash-form" style={{ marginBottom: 24 }}>
+      <div className="dash-form" id="profile-edit-section" style={{ marginBottom: 24 }}>
         <h3>Update Profile</h3>
         <form onSubmit={submit}>
           <div className="form-group"><label>Email (cannot change)</label><input value={user?.email} disabled style={{ background: '#f5f5f5' }} /></div>
@@ -355,7 +368,7 @@ const Profile = () => {
       </div>
 
       {/* Change Password */}
-      <div className="dash-form" style={{ maxWidth: '100%' }}>
+      <div className="dash-form" id="profile-security-section" style={{ maxWidth: '100%' }}>
         <h3>Change Password</h3>
         <form onSubmit={changePassword}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
@@ -402,8 +415,7 @@ const Suggestions = () => {
       api('/suggestions/my/').then(r => setMySuggestions(Array.isArray(r.data) ? r.data : []));
     } else setToast({ message: 'Failed to submit suggestion.', type: 'error' });
   };
-
-return (
+  return (
     <>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
@@ -476,7 +488,7 @@ const MemberDashboard = () => (
       <Route path="/elections" element={<ElectionsVote />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/suggestions" element={<Suggestions />} />
-      <Route path="/chat-history" element={<ChatHistory />} />
+      <Route path="/contact" element={<Contact />} />
     </Routes>
   </DashboardLayout>
 );

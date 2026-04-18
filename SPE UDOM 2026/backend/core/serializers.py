@@ -127,11 +127,21 @@ class AnnouncementSerializer(serializers.ModelSerializer):
 
 class PublicationSerializer(serializers.ModelSerializer):
     published_by_name = serializers.CharField(source='published_by.full_name', read_only=True)
+    pub_type = serializers.CharField(source='pub_type', read_only=True)
+    file_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Publication
-        fields = ['id', 'title', 'content', 'file', 'published_by_name', 'created_at']
-        extra_kwargs = {'content': {'required': False}}
+        fields = ['id', 'title', 'content', 'file', 'file_url', 'pub_type', 'published_by_name', 'created_at']
+        extra_kwargs = {'content': {'required': False}, 'file': {'write_only': True}}
+
+    def get_file_url(self, obj):
+        if not obj.file:
+            return None
+        request = self.context.get('request')
+        if request:
+            return request.build_absolute_uri(obj.file.url)
+        return obj.file.url
 
 
 class CandidateSerializer(serializers.ModelSerializer):

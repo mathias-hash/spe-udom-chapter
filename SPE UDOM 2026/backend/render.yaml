@@ -2,10 +2,12 @@ services:
   - type: web
     name: spe-udom-backend
     env: python
-    rootDir: backend
+    rootDir: SPE UDOM 2026/backend
     buildCommand: ./build.sh
-    startCommand: gunicorn backend.wsgi:application
+    startCommand: bash -c 'python manage.py migrate && python create_superuser.py && echo "Deployment successful. Starting Daphne ASGI server..." && daphne -b 0.0.0.0 -p ${PORT:-8000} backend.asgi:application'
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.3
       - key: SECRET_KEY
         generateValue: true
       - key: DEBUG
@@ -20,6 +22,7 @@ services:
         fromDatabase:
           name: spe-udom-db
           property: connectionString
+        sync: true
 
 databases:
   - name: spe-udom-db

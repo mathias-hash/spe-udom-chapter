@@ -9,6 +9,7 @@ urlpatterns = [
     path('leadership/', views.leadership),
     path('leadership/years/', views.leadership_years),
     path('leadership/advance-year/', views.leadership_advance_year),
+    path('leadership/delete-year/<str:year>/', views.leadership_delete_year),
     path('leadership/manage/', views.leadership_create),
     path('leadership/<int:pk>/', views.leadership_detail),
     path('contact/', views.contact),
@@ -46,6 +47,7 @@ urlpatterns = [
 
     # Announcements
     path('announcements/', views.announcements),
+    path('announcements/<int:pk>/', views.delete_announcement),
 
     # Publications
     path('publications/', views.publications),
@@ -71,8 +73,8 @@ urlpatterns = [
 
     # Annual Report
     path('annual-reports/', views.annual_report_list),
-    path('annual-reports/<str:year>/', views.annual_report_detail),
-    path('annual-reports/<str:year>/financial/', views.annual_report_financial),
-    path('annual-reports/<str:year>/images/<str:section>/', views.annual_report_upload_image),
+    path('annual-reports/<path:year>/', views.annual_report_detail),
+    path('annual-reports/<path:year>/financial/', views.annual_report_financial),
+    path('annual-reports/<path:year>/images/<str:section>/', views.annual_report_upload_image),
     path('annual-reports/images/<int:pk>/', views.annual_report_delete_image),
 ]

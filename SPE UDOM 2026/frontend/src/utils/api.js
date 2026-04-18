@@ -1,4 +1,47 @@
-export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
+const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1']);
+const DEV_FRONTEND_PORTS = new Set(['3000', '3001', '5173', '4173']);
+
+const isPrivateIpv4Host = hostname => (
+  /^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname) ||
+  /^192\.168\.\d{1,3}\.\d{1,3}$/.test(hostname) ||
+  /^172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}$/.test(hostname)
+);
+
+const isDevelopmentFrontendHost = location => {
+  if (!location) return false;
+  const { hostname, port } = location;
+  return LOCAL_HOSTS.has(hostname) || isPrivateIpv4Host(hostname) || DEV_FRONTEND_PORTS.has(port);
+};
+
+const getRuntimeApiBaseUrl = () => {
+  const configuredBase = process.env.REACT_APP_API_BASE_URL?.trim().replace(/\/$/, '');
+  if (typeof window === 'undefined') return 'http://localhost:8000';
+  const { hostname, protocol, host } = window.location;
+  if (configuredBase) {
+    try {
+      const configuredUrl = new URL(configuredBase);
+      const configuredHostIsLocal = isDevelopmentFrontendHost({
+        hostname: configuredUrl.hostname,
+        port: configuredUrl.port,
+      });
+      const currentHostIsLocal = isDevelopmentFrontendHost(window.location);
+
+      // Ignore localhost/private-network API URLs when the app is running on a public host.
+      if (!configuredHostIsLocal || currentHostIsLocal) {
+        return configuredBase;
+      }
+    } catch {
+      return configuredBase;
+    }
+  }
+  if (isDevelopmentFrontendHost(window.location)) {
+    return `${protocol}//${hostname}:8000`;
+  }
+  // On production with no env var set, same origin (assumes backend served from same domain)
+  return `${protocol}//${host}`;
+};
+
+export const API_BASE_URL = getRuntimeApiBaseUrl();
 export const API_BASE = `${API_BASE_URL}/api`;
 
 // Token refresh configuration
@@ -56,47 +99,49 @@ class TokenManager {
 }
 
 const tokenManager = new TokenManager();
+let refreshPromise = null;
 
 /**
  * Refresh access token with retry protection
  */
 const refreshAccessToken = async () => {
-  // Prevent multiple simultaneous refresh attempts
-  if (tokenManager.isRefreshing) {
-    return null;
-  }
+  if (refreshPromise) return refreshPromise;
 
   const refresh = tokenManager.getRefreshToken();
   if (!refresh) return null;
 
-  tokenManager.isRefreshing = true;
+  refreshPromise = (async () => {
+    tokenManager.isRefreshing = true;
 
-  try {
-    const res = await fetch(`${API_BASE}/auth/token/refresh/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-      },
-      credentials: 'omit', // Don't send cookies (using JWT)
-      body: JSON.stringify({ refresh }),
-    });
+    try {
+      const res = await fetch(`${API_BASE}/auth/token/refresh/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        credentials: 'omit', // Don't send cookies (using JWT)
+        body: JSON.stringify({ refresh }),
+      });
 
-    tokenManager.isRefreshing = false;
-
-    if (res.ok) {
-      const data = await res.json();
-      if (data.access) {
-        tokenManager.setAccessToken(data.access);
-        return data.access;
+      if (res.ok) {
+        const data = await res.json();
+        if (data.access) {
+          tokenManager.setAccessToken(data.access);
+          return data.access;
+        }
       }
+    } catch (error) {
+      console.error('Token refresh error:', error);
+    } finally {
+      tokenManager.isRefreshing = false;
+      refreshPromise = null;
     }
-  } catch (error) {
-    console.error('Token refresh error:', error);
-    tokenManager.isRefreshing = false;
-  }
 
-  return null;
+    return null;
+  })();
+
+  return refreshPromise;
 };
 
 /**
@@ -112,7 +157,15 @@ export const api = async (endpoint, options = {}, retryAttempt = 0) => {
     return { ok: false, status: 400, data: { error: 'Invalid endpoint' } };
   }
 
-  const token = tokenManager.getAccessToken();
+  let token = tokenManager.getAccessToken();
+  const refreshToken = tokenManager.getRefreshToken();
+  if (token && refreshToken && tokenManager.isTokenExpired(token)) {
+    token = await refreshAccessToken();
+    if (!token) {
+      handleAuthenticationFailure();
+      return { ok: false, status: 401, data: { error: 'Authentication failed' } };
+    }
+  }
   const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
   const headers = {
     'Content-Type': 'application/json',
@@ -157,7 +210,13 @@ export const api = async (endpoint, options = {}, retryAttempt = 0) => {
     return { ok: res.ok, status: res.status, data };
   } catch (error) {
     console.error('API request error:', error);
-    return { ok: false, status: 0, data: { error: 'Network error' } };
+    return {
+      ok: false,
+      status: 0,
+      data: {
+        error: `Cannot connect to the server at ${API_BASE_URL}. Check that the backend is running and reachable.`,
+      },
+    };
   }
 };
 

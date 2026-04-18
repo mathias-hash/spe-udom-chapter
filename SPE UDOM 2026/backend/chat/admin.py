@@ -33,6 +33,35 @@ class MessageQuotaAdmin(admin.ModelAdmin):
 
 @admin.register(ChatFAQ)
 class ChatFAQAdmin(admin.ModelAdmin):
-    list_display = ['title', 'priority', 'is_active', 'updated_at']
-    list_filter = ['is_active', 'updated_at']
+    list_display = ['title', 'keywords_short', 'priority', 'is_active', 'updated_at']
+    list_filter = ['is_active', 'priority', 'updated_at']
     search_fields = ['title', 'keywords', 'response']
+    ordering = ['-priority', 'title']
+    
+    fieldsets = (
+        ('Question', {
+            'fields': ('title',),
+            'description': 'A short title for this Q&A (e.g., "How to Join", "Scholarship Information")'
+        }),
+        ('Training Keywords', {
+            'fields': ('keywords',),
+            'description': 'Comma-separated keywords/phrases users might type. Examples: "join,membership,register,how to join,become member,apply". Be specific and thorough!'
+        }),
+        ('Response', {
+            'fields': ('response',),
+            'description': 'The complete answer the bot will give when user message matches keywords above.'
+        }),
+        ('Settings', {
+            'fields': ('priority', 'is_active'),
+            'description': 'Higher priority = checked first. Inactive FAQs are ignored.'
+        }),
+    )
+    
+    def keywords_short(self, obj):
+        return obj.keywords[:50] + '...' if len(obj.keywords) > 50 else obj.keywords
+    keywords_short.short_description = 'Keywords'
+    
+    def get_readonly_fields(self, request, obj=None):
+        if obj:  # Editing existing object
+            return []
+        return []

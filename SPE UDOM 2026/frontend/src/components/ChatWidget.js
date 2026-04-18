@@ -1,9 +1,27 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../utils/api';
 import './ChatWidget.css';
 
-const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
-const wsBaseUrl = process.env.REACT_APP_WS_BASE_URL || apiBaseUrl.replace(/^http/, 'ws');
+const apiBaseUrl = API_BASE_URL;
+
+// Construct WebSocket URL correctly
+const getWsBaseUrl = () => {
+  if (process.env.REACT_APP_WS_BASE_URL) {
+    return process.env.REACT_APP_WS_BASE_URL;
+  }
+  // Parse the API base URL properly
+  try {
+    const url = new URL(apiBaseUrl);
+    const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${protocol}//${url.host}`;
+  } catch (e) {
+    console.error('Invalid API base URL:', apiBaseUrl);
+    return 'ws://localhost:8000';
+  }
+};
+
+const wsBaseUrl = getWsBaseUrl();
 
 const ChatWidget = () => {
   const { user } = useAuth();
@@ -43,10 +61,7 @@ const ChatWidget = () => {
         const data = await response.json();
         if (!ignore) {
           setRoom(data);
-          setMessages(data.messages || []);
-          if (!guestName && data.sender_role === 'guest') {
-            setGuestName(data.display_name || 'Guest User');
-          }
+          setMessages([]);
         }
       } catch (error) {
         if (!ignore) {
@@ -70,9 +85,18 @@ const ChatWidget = () => {
     const socket = new WebSocket(`${wsBaseUrl}/ws/chat/${room.room_key}/`);
     socketRef.current = socket;
 
-    socket.onopen = () => setIsConnected(true);
-    socket.onclose = () => setIsConnected(false);
-    socket.onerror = () => setIsConnected(false);
+    socket.onopen = () => {
+      console.log('WebSocket connected:', wsBaseUrl);
+      setIsConnected(true);
+    };
+    socket.onclose = (event) => {
+      console.log('WebSocket closed:', event.code, event.reason);
+      setIsConnected(false);
+    };
+    socket.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      setIsConnected(false);
+    };
     socket.onmessage = (event) => {
       const payload = JSON.parse(event.data);
       if (payload.type !== 'message') {
