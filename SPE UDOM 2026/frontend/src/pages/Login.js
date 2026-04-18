@@ -6,7 +6,6 @@ import Toast from '../components/Toast';
 import AuthSlideshow from '../components/AuthSlideshow';
 import TopBanner from '../components/TopBanner';
 import Navbar from '../components/Navbar';
-import logo from '../assets/spe-udom-logo.png';
 import './Auth.css';
 
 const normalizeErrors = data => {
@@ -40,12 +39,10 @@ const Login = () => {
         login(response.data.user, response.data.tokens);
         setTimeout(() => navigate('/dashboard'), 1200);
       } else {
-        // Better error diagnosis
         const errorData = normalizeErrors(response.data);
         if (!errorData.non_field_errors || errorData.non_field_errors.length === 0) {
-          // Check if it's a server connectivity issue
           if (response.status === 0) {
-            setErrors({ non_field_errors: ['Cannot reach the backend server. Make sure it\'s running on http://localhost:8000'] });
+            setErrors({ non_field_errors: ['Cannot reach the backend server. Make sure it is running on http://localhost:8000'] });
           } else if (response.status >= 500) {
             setErrors({ non_field_errors: ['Server error. Please try again later.'] });
           } else if (response.status === 400 && !response.data.email && !response.data.password) {
@@ -66,32 +63,15 @@ const Login = () => {
 
   return (
     <div className="auth-page-wrapper">
-      {/* Sidebar */}
-      <aside className="auth-sidebar">
-        <div className="auth-sidebar-header">
-          <img src={logo} alt="SPE" style={{ height: '32px', width: 'auto' }} />
-          <span style={{ color: '#fff', fontWeight: 700, fontSize: '0.9rem', marginLeft: '8px' }}>SPE UDOM</span>
-        </div>
-        <nav className="auth-sidebar-nav">
-          <Link to="/" className="auth-sidebar-link">🏠 Home</Link>
-          <Link to="/events" className="auth-sidebar-link">📅 Events</Link>
-          <Link to="/publications" className="auth-sidebar-link">📚 Publications</Link>
-          <Link to="/leadership" className="auth-sidebar-link">👥 Leadership</Link>
-        </nav>
-      </aside>
-
-      {/* Main Auth Content */}
       <div className="auth-wrapper">
         <TopBanner />
         <Navbar showBanner={false} />
         {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-        {/* Left — Slideshow */}
         <div className="auth-slideshow-panel">
           <AuthSlideshow />
         </div>
 
-        {/* Right — Form */}
         <div className="auth-form-panel">
           <div className="auth-card">
             <div className="auth-header">
@@ -133,7 +113,7 @@ const Login = () => {
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
-                    {showPassword ? '👁️' : '👁️‍🗨️'}
+                    {showPassword ? 'Show' : 'Hide'}
                   </button>
                 </div>
                 {errors.password && <span className="error">{errors.password}</span>}

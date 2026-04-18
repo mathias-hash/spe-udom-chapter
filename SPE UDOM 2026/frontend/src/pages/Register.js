@@ -6,7 +6,6 @@ import Toast from '../components/Toast';
 import AuthSlideshow from '../components/AuthSlideshow';
 import TopBanner from '../components/TopBanner';
 import Navbar from '../components/Navbar';
-import logo from '../assets/spe-udom-logo.png';
 import './Auth.css';
 
 const normalizeErrors = data => {
@@ -39,7 +38,7 @@ const Register = () => {
         method: 'POST',
         body: JSON.stringify(form),
       });
-      
+
       if (response.ok) {
         setToast({ message: 'Registration successful! Welcome to SPE UDOM Chapter.', type: 'success' });
         login(response.data.user, response.data.tokens);
@@ -55,32 +54,15 @@ const Register = () => {
 
   return (
     <div className="auth-page-wrapper">
-      {/* Sidebar */}
-      <aside className="auth-sidebar">
-        <div className="auth-sidebar-header">
-          <img src={logo} alt="SPE" style={{ height: '32px', width: 'auto' }} />
-          <span style={{ color: '#fff', fontWeight: 700, fontSize: '0.9rem', marginLeft: '8px' }}>SPE UDOM</span>
-        </div>
-        <nav className="auth-sidebar-nav">
-          <Link to="/" className="auth-sidebar-link">🏠 Home</Link>
-          <Link to="/events" className="auth-sidebar-link">📅 Events</Link>
-          <Link to="/publications" className="auth-sidebar-link">📚 Publications</Link>
-          <Link to="/leadership" className="auth-sidebar-link">👥 Leadership</Link>
-        </nav>
-      </aside>
-
-      {/* Main Auth Content */}
       <div className="auth-wrapper">
         <TopBanner />
         <Navbar showBanner={false} />
         {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-        {/* Left — Slideshow */}
         <div className="auth-slideshow-panel">
           <AuthSlideshow />
         </div>
 
-        {/* Right — Form */}
         <div className="auth-form-panel">
           <div className="auth-card">
             <div className="auth-header">
@@ -161,7 +143,7 @@ const Register = () => {
                       onClick={() => setShowPassword(!showPassword)}
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
-                      {showPassword ? '👁️' : '👁️‍🗨️'}
+                      {showPassword ? 'Show' : 'Hide'}
                     </button>
                   </div>
                   {errors.password && <span className="error">{errors.password}</span>}
@@ -184,7 +166,7 @@ const Register = () => {
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                     >
-                      {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+                      {showConfirmPassword ? 'Show' : 'Hide'}
                     </button>
                   </div>
                   {errors.confirm_password && <span className="error">{errors.confirm_password}</span>}
